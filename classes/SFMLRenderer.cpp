@@ -37,6 +37,28 @@ void SFMLRenderer::drawLine(int x1, int y1, int x2, int y2,
     this->window->draw(line, 2, sf::Lines);
 }
 
+void SFMLRenderer::drawCircle(int cx, int cy, int radius,
+                              unsigned char r, unsigned char g, unsigned char b) {
+    if (radius <= 0)
+        return;
+    sf::CircleShape circle(radius);
+    circle.setPosition(cx - radius, cy - radius);
+    circle.setFillColor(sf::Color::Transparent);
+    circle.setOutlineColor(sf::Color(r, g, b));
+    circle.setOutlineThickness(1);
+    this->window->draw(circle);
+}
+
+void SFMLRenderer::fillCircle(int cx, int cy, int radius,
+                              unsigned char r, unsigned char g, unsigned char b) {
+    if (radius <= 0)
+        return;
+    sf::CircleShape circle(radius);
+    circle.setPosition(cx - radius, cy - radius);
+    circle.setFillColor(sf::Color(r, g, b));
+    this->window->draw(circle);
+}
+
 void SFMLRenderer::fillRect(int x, int y, int w, int h,
                             unsigned char r, unsigned char g, unsigned char b) {
     sf::RectangleShape rect(sf::Vector2f(w, h));

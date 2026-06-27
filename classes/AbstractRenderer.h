@@ -43,6 +43,18 @@ public:
                           unsigned char r, unsigned char g, unsigned char b) = 0;
 
     /**
+     * @brief Draw a 1px circle outline in pixel space.
+     */
+    virtual void drawCircle(int cx, int cy, int radius,
+                            unsigned char r, unsigned char g, unsigned char b) = 0;
+
+    /**
+     * @brief Draw a filled circle in pixel space.
+     */
+    virtual void fillCircle(int cx, int cy, int radius,
+                            unsigned char r, unsigned char g, unsigned char b) = 0;
+
+    /**
      * @brief Draw a filled rectangle in pixel space (used for grid lines,
      *        Quoridor walls, and other primitive overlays).
      */
