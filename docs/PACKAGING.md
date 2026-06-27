@@ -1,6 +1,6 @@
 # Packaging & Distribution
 
-The Visitor Game Engine ships as **one codebase, two delivery targets**:
+The twove ships as **one codebase, two delivery targets**:
 
 | Target | Output | Entry point | Backend | Build tool |
 |---|---|---|---|---|
@@ -53,7 +53,7 @@ translation units are compiled and linked.
 ### Run
 
 ```bash
-./build/VisitorGameEngine          # MSVC: build/Release/VisitorGameEngine.exe
+./build/twove          # MSVC: build/Release/twove.exe
 ```
 
 A menu reads from stdin: `0` Tic-Tac-Toe, `1` Pong, `2` Quoridor, `3` quit.
@@ -64,8 +64,8 @@ A CMake/SDL2 build links SDL2 dynamically, so the executable needs its DLLs and
 the `assets/` folder beside it. A minimal distributable folder:
 
 ```
-VisitorGameEngine/
-  VisitorGameEngine.exe
+twove/
+  twove.exe
   SDL2.dll
   SDL2_image.dll
   assets/            ← copied from the repo root
@@ -185,7 +185,7 @@ to just the source, assets, CMake, entry points, and web shell.
 
 ```
                          main_native.cpp ─┐
-                                          ├─► CMake + SDL2 ─► VisitorGameEngine(.exe)   [desktop]
+                                          ├─► CMake + SDL2 ─► twove(.exe)   [desktop]
    classes/  (engine + games, identical) ─┤
                                           └─► emcmake + SDL2 ─► pong.{html,js,wasm,data} [browser]
                          main_web.cpp ─────┘

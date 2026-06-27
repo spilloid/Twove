@@ -1,12 +1,12 @@
 <div align="center">
 
-# Visitor Game Engine
+# twove
 
 **A C++17 game engine where behavior is composed, not inherited.**
 Every entity is a `Sprite`. Every behavior is a `Visitor`. The engine loop is two
 virtual calls per sprite per frame — and that double dispatch *is* the engine.
 
-[**▶ Play the demos**](https://jdspille.github.io/Visitor-Game-Engine/) · [Packaging guide](docs/PACKAGING.md) · [API docs](https://jdspille.github.io/Visitor-Game-Engine/html/index.html)
+[**▶ Play the demos**](https://spillerstech.us/Twove/) · [Packaging guide](docs/PACKAGING.md) · [API docs](https://spillerstech.us/Twove/html/index.html)
 
 `Visitor` · `Abstract Factory` · `Strategy` · SDL2 · WebAssembly · zero `dynamic_cast`
 
@@ -36,10 +36,10 @@ The same engine and game code runs as a **native desktop app** *or* in the
 
 | Target | Output | Backend | Build |
 |---|---|---|---|
-| 🖥️ Desktop | `VisitorGameEngine(.exe)` — stdin game menu | SDL2 (default) / SFML | CMake |
+| 🖥️ Desktop | `twove(.exe)` — stdin game menu | SDL2 (default) / SFML | CMake |
 | 🌐 Web | one playable `.html` per game | SDL2 → WASM | Emscripten + CMake |
 
-▶ **[Try the WebAssembly demos in your browser →](https://jdspille.github.io/Visitor-Game-Engine/)**
+▶ **[Try the WebAssembly demos in your browser →](https://spillerstech.us/Twove/)**
 
 ## Quick start (desktop)
 
@@ -55,7 +55,7 @@ Requires CMake, a C++17 compiler, and SDL2 + SDL2_image
 
 # …or CMake directly
 cmake -B build -DBACKEND=SDL2 && cmake --build build -j4
-./build/VisitorGameEngine        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor · 3 quit
+./build/twove        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor · 3 quit
 ```
 
 For the browser build, GitHub Pages packaging, and how to distribute the `.exe`,
@@ -110,7 +110,7 @@ GameEngine::update()
 | `BounceBoundsVisitor` | Physics | Reflects `dx`/`dy` at the scene boundary |
 | `WrapBoundsVisitor` | Physics | Teleports a sprite from one edge to the opposite |
 | `BoundingBoxCollisionVisitor` | Collision | AABB test against a single watched sprite |
-| `RayCastCollisionVisitor` | Stub | Interface in place; unimplemented |
+| `RayCastCollisionVisitor` | Collision | Casts a ray from a moving sprite along its velocity; reports everything in its path (ray-vs-AABB). Pong's AI uses it to know when the ball is incoming |
 
 ## Architecture
 
@@ -133,9 +133,9 @@ handle — which is exactly what lets the same code target desktop and the web.
 
 | Game | Status | Notes |
 |---|---|---|
-| **Pong** | Complete | Two-player; perfect-tracking AI on player 2; scoring + round resets |
-| **Quoridor** | Demo | Shows `GridDrawingVisitor`; movement works, win condition absent |
-| **TicTacToe** | Scaffold | Grid renders; game logic not yet implemented |
+| **Pong** | Playable | Two-player; player 2 is a raycast AI that only chases the incoming ball (so it's beatable); scoring + round resets |
+| **Quoridor** | Playable | Real 9×9 board with **walls**; arrow-keys/tap to move, click a grid line to wall (long-press on touch); BFS forbids trapping a player; race to the far row |
+| **TicTacToe** | Playable | Click to place; turn tracking, win/draw detection, X/O textures on a visible 3×3 grid |
 
 ## Project layout
 
@@ -168,15 +168,14 @@ See [CLAUDE.md](CLAUDE.md) for the full house style.
 
 ## Known limitations
 
-- **Raw keycodes in older game code** — being migrated to the backend-neutral `Key` enum.
 - **`GravityVisitor` reads backwards** — subtracts from `dy` (up in screen space); correct, counter-intuitive.
 - **`LayeredScene`** has no bounds check on the layer index; an out-of-range layer silently no-ops.
-- **Text rendering** — not implemented; `AbstractRenderer` has no text API.
-- **Click events** — the input wrapper reports the last click position rather than a queue, so fast clicks can be missed.
-- **`RayCastCollisionVisitor`** — stubbed, unimplemented.
+- **Text rendering** — not implemented; scores and turns print to the console. `AbstractRenderer` draws sprites and primitives (lines/rects), not text.
+- **Click events** — the input wrapper polls the current mouse/touch state rather than queuing events, so games rising-edge-detect clicks themselves.
+- **SFML backend** — predates the SDL2 work; needs an SFML 2→3 port before `-DBACKEND=SFML` compiles.
 
 ---
 
 <div align="center">
-Built for CS400 Game Development · <a href="docs/PACKAGING.md">Packaging</a> · <a href="https://jdspille.github.io/Visitor-Game-Engine/">Live demos</a>
+Built for CS400 Game Development · <a href="docs/PACKAGING.md">Packaging</a> · <a href="https://spillerstech.us/Twove/">Live demos</a>
 </div>

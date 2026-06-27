@@ -7,6 +7,7 @@
 #include "../WrapBoundsVisitor.h"
 #include "../ForceVisitor.h"
 #include "../BoundingBoxCollisionVisitor.h"
+#include "../RayCastCollisionVisitor.h"
 #include "../SimpleDrawingVisitor.h"
 #include "../GridDrawingVisitor.h"
 #include "../Backend.h"

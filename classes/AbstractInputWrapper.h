@@ -5,12 +5,17 @@
 #include <vector>
 
 /**
- * @brief A mouse click, in pixel coordinates.
+ * @brief A mouse/touch click, in pixel coordinates.
+ *
+ * isLong distinguishes a long-press (held past a short threshold) from a quick
+ * tap, so touch devices can use long-press as a distinct gesture (e.g. placing
+ * a Quoridor wall) without a second mouse button.
  */
 struct click {
     int x;
     int y;
     int isLeft;
+    int isLong;
 };
 
 /**

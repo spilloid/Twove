@@ -9,10 +9,16 @@ SFMLRenderer::SFMLRenderer(unsigned int screenWidth, unsigned int screenHeight)
     this->tf = std::make_shared<TextureFactory>();
 }
 
-void SFMLRenderer::draw(const std::vector<Sprite*>& renderList) {
-    // 1. REFRESH SCREEN
+void SFMLRenderer::clear() {
     this->window->clear(sf::Color::White);
-    //iterate over sprite list
+}
+
+void SFMLRenderer::present() {
+    this->window->display();
+}
+
+void SFMLRenderer::draw(const std::vector<Sprite*>& renderList) {
+    //iterate over sprite list (no clear/present -- the caller frames the draw)
     for (const auto &i : renderList) {
         std::shared_ptr<sf::Sprite> temp = std::make_shared<sf::Sprite>();
         temp->setTexture(*this->tf->getTexture(i->getTextureLocation()));
@@ -20,7 +26,23 @@ void SFMLRenderer::draw(const std::vector<Sprite*>& renderList) {
         temp->setPosition(i->getX(), i->getY());
         this->window->draw(*temp);
     }
-    this->window->display();
+}
+
+void SFMLRenderer::drawLine(int x1, int y1, int x2, int y2,
+                            unsigned char r, unsigned char g, unsigned char b) {
+    sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(x1, y1), sf::Color(r, g, b)),
+            sf::Vertex(sf::Vector2f(x2, y2), sf::Color(r, g, b)),
+    };
+    this->window->draw(line, 2, sf::Lines);
+}
+
+void SFMLRenderer::fillRect(int x, int y, int w, int h,
+                            unsigned char r, unsigned char g, unsigned char b) {
+    sf::RectangleShape rect(sf::Vector2f(w, h));
+    rect.setPosition(x, y);
+    rect.setFillColor(sf::Color(r, g, b));
+    this->window->draw(rect);
 }
 bool SFMLRenderer::isOpen()
 {

@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for working in the Visitor Game Engine. This file captures how this
+Guidance for working in the twove. This file captures how this
 codebase is built and — more importantly — the C++ style and design instincts it
 is written with. Match them; don't fight them.
 
@@ -64,7 +64,7 @@ CMake with a build-time backend switch — the single seam that picks the target
 ```bash
 cmake -B build -DBACKEND=SDL2      # default; SDL2 is installed and is the WASM path too
 cmake --build build -j4
-./build/VisitorGameEngine          # menu: 0 TicTacToe, 1 Pong, 2 Quoridor, 3 quit
+./build/twove          # menu: 0 TicTacToe, 1 Pong, 2 Quoridor, 3 quit
 ```
 
 `-DBACKEND=SFML` selects the SFML target instead (see status below). Only the
@@ -95,7 +95,7 @@ cmake -B build -DBACKEND=SDL2 \
 ## Verifying changes
 
 These are GUI apps that loop until the window closes and read the menu from
-stdin. To smoke-test headlessly: `printf '1\n' | ./build/VisitorGameEngine &`,
+stdin. To smoke-test headlessly: `printf '1\n' | ./build/twove &`,
 let it run ~1.5s, check the log for the game's startup line / gameplay output,
-then `pkill -f VisitorGameEngine`. Buffered stdout is lost on kill, so rely on
+then `pkill -f twove`. Buffered stdout is lost on kill, so rely on
 `std::endl`-flushed lines printed during the run.

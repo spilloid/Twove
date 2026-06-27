@@ -21,4 +21,4 @@ COPY . .
 RUN cmake -B build -DBACKEND="${BACKEND}" \
  && cmake --build build -j"$(nproc)"
 
-CMD ["bash", "-lc", "echo 'Native build OK:'; ls -la build/VisitorGameEngine"]
+CMD ["bash", "-lc", "echo 'Native build OK:'; ls -la build/twove"]

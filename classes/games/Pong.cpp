@@ -25,6 +25,8 @@ void Pong::start()
     std::shared_ptr<BounceBoundsVisitor> bv = std::make_shared<BounceBoundsVisitor>(MINX, MAXX, MINY, MAXY);
     std::shared_ptr<ForceVisitor> fv = std::make_shared<ForceVisitor>();
     std::shared_ptr<BoundingBoxCollisionVisitor> bbcv = std::make_shared<BoundingBoxCollisionVisitor>();
+    //raycast from the ball along its velocity -- lets the AI "see" the ball coming
+    std::shared_ptr<RayCastCollisionVisitor> rcv = std::make_shared<RayCastCollisionVisitor>();
     std::shared_ptr<SimpleDrawingVisitor> draw = std::make_shared<SimpleDrawingVisitor>(ar);
 
     //declare game engine
@@ -42,10 +44,12 @@ void Pong::start()
 
     //tweak visitors
     bbcv->setWatched(ball.get());
+    rcv->setWatched(ball.get());
     fv->applyForce(ball, 10, rand());
 
     //add visitors to scene
     ge->addVisitor(bbcv);
+    ge->addVisitor(rcv);
     ge->addVisitor(fv);
     ge->addVisitor(bv);
     //gotta add the drawing visitor last
@@ -128,8 +132,16 @@ void Pong::start()
                     //start the next round
                 }
             }
-            //perfect "AI"
-            player2->setXY(player2->getX(), ball->getY() - paddleHeight / 2 - 20);
+            //raycast "AI": the ray from the ball hits player2Goal only when the
+            //ball is actually heading toward player 2's side. Chase only then;
+            //otherwise drift back to centre. That makes the AI beatable -- catch
+            //it out of position and you can score.
+            bool incoming = false;
+            for (auto *hit : rcv->getCollisions())
+                if (hit == player2Goal.get()) incoming = true;
+            double aiTarget = incoming ? ball->getY() - paddleHeight / 2.0 - 20
+                                       : MAXY / 2.0 - paddleHeight / 2.0;
+            player2->setXY(player2->getX(), aiTarget);
 
             draw->draw();
         }

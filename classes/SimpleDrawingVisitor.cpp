@@ -14,6 +14,8 @@ void SimpleDrawingVisitor::visit(Sprite* s) {
 bool SimpleDrawingVisitor::isOpen() { return this->renderer->isOpen(); }
 
 void SimpleDrawingVisitor::draw() {
+  this->renderer->clear();
   this->renderer->draw(this->renderList);
+  this->renderer->present();
   this->renderList.clear();
 }

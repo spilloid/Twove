@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(VisitorGameEngine VERSION 1.0 LANGUAGES CXX)
+project(twove VERSION 1.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -82,28 +82,28 @@ if(EMSCRIPTEN)
         set_target_properties(${game_lower} PROPERTIES SUFFIX ".html")
     endforeach()
 
-    message(STATUS "VisitorGameEngine WASM targets: pong, tictactoe, quoridor")
+    message(STATUS "twove WASM targets: pong, tictactoe, quoridor")
 
 else()
     # -----------------------------------------------------------------------
     # Native: single executable with the stdin game menu.
     # -----------------------------------------------------------------------
-    add_executable(VisitorGameEngine main_native.cpp ${ENGINE_SOURCES})
+    add_executable(twove main_native.cpp ${ENGINE_SOURCES})
 
     if(BACKEND STREQUAL "SDL2")
-        target_sources(VisitorGameEngine PRIVATE ${SDL_BACKEND_SOURCES})
+        target_sources(twove PRIVATE ${SDL_BACKEND_SOURCES})
         find_package(SDL2 REQUIRED)
         find_package(SDL2_image REQUIRED)
-        target_link_libraries(VisitorGameEngine PRIVATE SDL2::SDL2 SDL2_image::SDL2_image)
+        target_link_libraries(twove PRIVATE SDL2::SDL2 SDL2_image::SDL2_image)
 
     elseif(BACKEND STREQUAL "SFML")
-        target_sources(VisitorGameEngine PRIVATE ${SFML_BACKEND_SOURCES})
+        target_sources(twove PRIVATE ${SFML_BACKEND_SOURCES})
         find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
-        target_link_libraries(VisitorGameEngine PRIVATE SFML::Graphics SFML::Window SFML::System)
+        target_link_libraries(twove PRIVATE SFML::Graphics SFML::Window SFML::System)
 
     else()
         message(FATAL_ERROR "Unknown BACKEND '${BACKEND}'. Use SDL2 or SFML.")
     endif()
 
-    message(STATUS "VisitorGameEngine native backend: ${BACKEND}")
+    message(STATUS "twove native backend: ${BACKEND}")
 endif()

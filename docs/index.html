@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visitor Game Engine</title>
+  <title>twove</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -521,7 +521,7 @@
 
 <!-- ── Nav ─────────────────────────────────────────────── -->
 <nav>
-  <span class="nav-brand">visitor<span>::</span>engine</span>
+  <span class="nav-brand">twove<span>()</span></span>
   <a href="#play">Play</a>
   <a href="#idea">The Idea</a>
   <a href="#dispatch">Dispatch</a>
@@ -536,14 +536,14 @@
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
   <div class="container">
-    <div class="hero-badge">C++ · SFML · Visitor Pattern</div>
+    <div class="hero-badge">C++17 · SDL2 · WebAssembly · Visitor Pattern</div>
     <h1>Behavior by <em>composition</em>,<br>not inheritance.</h1>
     <p class="hero-sub">
       A game engine where every operation is a Visitor and every entity is a Sprite.
       No entity subclasses. No type switches. Just double dispatch — two vtable lookups per sprite per frame.
     </p>
     <div class="hero-actions">
-      <a href="https://github.com/jdspille/Visitor-Game-Engine" class="btn btn-primary">
+      <a href="https://github.com/spilloid/Twove" class="btn btn-primary">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         View on GitHub
       </a>
@@ -610,7 +610,7 @@
     </div>
 
     <div class="demo-stage">
-      <iframe id="demo-frame" src="demos/pong.html" title="Visitor Game Engine — playable WASM demo"
+      <iframe id="demo-frame" src="demos/pong.html" title="twove — playable WASM demo"
               loading="lazy" allow="autoplay"></iframe>
     </div>
 
@@ -698,7 +698,7 @@
       </div>
       <pre class="language-cpp"><code class="language-cpp">void GameEngine::update() {
     for (auto &amp;visitor : this-&gt;sceneVisitors)
-        this-&gt;scene-&gt;accept(visitor); // ← dispatch #1: which scene?
+        this-&gt;scene-&gt;accept(visitor.get()); // ← dispatch #1: which scene?
 }</code></pre>
     </div>
 
@@ -714,9 +714,9 @@
         <span class="dot dot-g"></span>
         <span class="code-window-title">SimpleScene.cpp</span>
       </div>
-      <pre class="language-cpp"><code class="language-cpp">void SimpleScene::accept(std::shared_ptr&lt;Visitor&gt; v) {
+      <pre class="language-cpp"><code class="language-cpp">void SimpleScene::accept(Visitor* v) {
     for (auto &amp;sprite : this-&gt;spriteList)
-        v-&gt;visit(sprite); // ← dispatch #2: which visitor?
+        v-&gt;visit(sprite.get()); // ← dispatch #2: which visitor?
 }</code></pre>
     </div>
 
@@ -724,6 +724,13 @@
       <code>v->visit()</code> is the second virtual call. Each concrete Visitor implements its
       own <code>visit()</code> — physics, collision, drawing — and the vtable picks the right one.
       The CPU branch predictor gets very good at this loop very quickly.
+    </p>
+
+    <p>
+      Both hops hand the sprite/visitor across as a <strong style="color:#e6edf3">non-owning raw
+      pointer</strong> — the scene owns the graph, the visitor only observes it — so the hot loop
+      carries no <code>shared_ptr</code> reference-count traffic. The dispatch stays as light as the
+      two vtable lookups it's meant to be.
     </p>
 
     <div class="dispatch-diagram">
@@ -777,8 +784,9 @@
   <span class="dim">                 ├── </span><span class="ok">WrapBoundsVisitor</span>            <span class="dim">teleport at boundary</span>
   <span class="dim">                 └── </span><span class="ok">GravityVisitor</span>               <span class="dim">accelerate downward</span>
 
-<span class="dim">AbstractRenderer ──► SFMLRenderer         </span><span class="dim">(or SDL2, WASM, …)</span>
-<span class="dim">AbstractInputWrapper ──► SFMLInputWrapper</span></pre>
+<span class="dim">AbstractRenderer ──► SDLRenderer          </span><span class="dim">(or SFML; WASM uses SDL2)</span>
+<span class="dim">AbstractInputWrapper ──► SDLInputWrapper</span>
+<span class="dim">Backend (abstract factory) ──► SDLBackend </span><span class="dim">picks the pair at build time</span></pre>
     </div>
   </div>
 </section>
@@ -836,8 +844,8 @@
         </tr>
         <tr>
           <td><code>RayCastCollisionVisitor</code></td>
-          <td><span class="badge badge-muted">Stub</span></td>
-          <td>Unimplemented. Interface is in place for future ray-based collision detection.</td>
+          <td><span class="badge badge-orange">Collision</span></td>
+          <td>Casts a ray from a moving sprite along its velocity and reports everything in its path (ray-vs-AABB, slab method). Pong's AI uses it to know when the ball is heading its way.</td>
         </tr>
       </tbody>
     </table>
@@ -934,8 +942,12 @@ force-&gt;applyForce(ball, 10, rand()); // kick off at a random angle</code></pr
         }
     }
 
-    // perfect AI: just track the ball
-    player2-&gt;setXY(player2-&gt;getX(), ball-&gt;getY() - paddleH/2);
+    // raycast AI: chase only when the ball's ray is pointed at our goal
+    bool incoming = false;
+    for (auto *hit : raycast-&gt;getCollisions())
+        if (hit == player2Goal.get()) incoming = true;
+    player2-&gt;setXY(player2-&gt;getX(), incoming ? ball-&gt;getY() - paddleH/2
+                                             : MAXY/2 - paddleH/2);
 
     draw-&gt;draw();
 }</code></pre>
@@ -961,22 +973,24 @@ force-&gt;applyForce(ball, 10, rand()); // kick off at a random angle</code></pr
       <div class="game-card">
         <h4>🏓 Pong <span class="badge badge-green" style="font-size:0.65rem">Complete</span></h4>
         <p>
-          Two paddles, a ball, goals. Player 1 on keyboard, perfect-tracking AI on player 2.
-          Full score counting and round resets. The flagship demo.
+          Two paddles, a ball, goals. Player 1 on keyboard; player 2 is a
+          <code>RayCastCollisionVisitor</code> AI that only chases when the ball is actually
+          aimed at it — so it's beatable. Scoring and round resets included.
         </p>
       </div>
       <div class="game-card">
-        <h4>♟ Quoridor <span class="badge badge-orange" style="font-size:0.65rem">Demo</span></h4>
+        <h4>♟ Quoridor <span class="badge badge-green" style="font-size:0.65rem">Playable</span></h4>
         <p>
-          Two players on a 24×24 grid. Shows <code>GridDrawingVisitor</code> converting grid
-          coordinates to pixels. Movement works; win condition absent.
+          Full 9×9 board with <strong>walls</strong>. Move by arrow keys or tapping an adjacent
+          cell; drop a wall by clicking a grid line (long-press on touch). A BFS rule forbids any
+          wall that would trap a player. First to the far row wins.
         </p>
       </div>
       <div class="game-card">
-        <h4>❌ TicTacToe <span class="badge badge-muted" style="font-size:0.65rem">Unfinished</span></h4>
+        <h4>❌ Tic Tac Toe <span class="badge badge-green" style="font-size:0.65rem">Playable</span></h4>
         <p>
-          3×3 grid renders via <code>GridDrawingVisitor</code>. No game logic implemented —
-          mostly a scaffold for future work.
+          Click to place. Turn tracking, win/draw detection, and X/O textures swapped onto cell
+          sprites at runtime — all on a visible 3×3 grid via <code>GridDrawingVisitor</code>.
         </p>
       </div>
     </div>
@@ -986,45 +1000,62 @@ force-&gt;applyForce(ball, 10, rand()); // kick off at a random angle</code></pr
 <!-- ── Build ─────────────────────────────────────────────── -->
 <section id="build">
   <div class="container">
-    <span class="label">Build &amp; Run</span>
-    <h2>One dependency. Three commands.</h2>
-    <p>Requires <a href="https://www.sfml-dev.org/download.php">SFML</a> (<code>libsfml-graphics</code>, <code>libsfml-window</code>, <code>libsfml-system</code>).</p>
+    <span class="label">Ship Anywhere</span>
+    <h2>One codebase. Two first-class targets.</h2>
+    <p>
+      The engine renders and reads input through <code>AbstractRenderer</code> /
+      <code>AbstractInputWrapper</code>, built by the <code>Backend</code> abstract factory. Flip
+      the backend at build time; the game code never changes. The SDL2 backend powers both the
+      native desktop build and — through Emscripten — the WebAssembly demos above.
+    </p>
 
-    <div class="build-steps">
-      <div class="build-step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <strong>Clone the repo</strong>
-          <code>git clone https://github.com/jdspille/Visitor-Game-Engine.git</code>
-        </div>
+    <div class="card-grid" style="margin-bottom:2.5rem">
+      <div class="card">
+        <div class="card-icon">🖥️</div>
+        <h4>Windows / macOS / Linux</h4>
+        <p>A native executable with a game-select menu. SDL2 + CMake; on Windows, SDL2 comes from vcpkg.</p>
       </div>
-      <div class="build-step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <strong>Build</strong>
-          <code>make</code> &nbsp;·&nbsp; or <code>make release</code> for an optimized build
-        </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <h4>WebAssembly</h4>
+        <p>The same C++ compiled with Emscripten — one playable <code>.html</code> per game. No rewrite.</p>
       </div>
-      <div class="build-step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <strong>Run</strong>
-          <code>make run</code> &nbsp;·&nbsp; launches an interactive game-select menu
-        </div>
+      <div class="card">
+        <div class="card-icon">🐳</div>
+        <h4>Docker</h4>
+        <p>A multi-stage build compiles the WASM games and serves them with nginx; one command to run.</p>
       </div>
     </div>
 
+    <div class="code-window">
+      <div class="code-window-bar">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span class="code-window-title">build</span>
+      </div>
+      <pre class="language-bash"><code class="language-bash"># Desktop (SDL2 + CMake)
+cmake -B build -DBACKEND=SDL2 &amp;&amp; cmake --build build -j4
+./build/twove        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor
+
+# Windows: point CMake at your vcpkg toolchain
+./scripts/build-native.ps1 -Toolchain C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+# Web (Emscripten) — or run the whole thing in Docker
+docker build -t vge-web . &amp;&amp; docker run --rm -p 8080:80 vge-web</code></pre>
+    </div>
+    <p>
+      Per-platform dependencies, packaging, and how to ship the binaries are in
+      <a href="https://github.com/spilloid/Twove/blob/main/docs/PACKAGING.md">PACKAGING.md</a>.
+    </p>
+
     <h3 style="margin-top:2.5rem">Known Limitations</h3>
     <p>
-      This engine was built as a learning project, and the rough edges are part of the record.
+      Built as a learning project — the remaining rough edges are part of the record.
     </p>
     <ul style="font-size:0.88rem; color:var(--muted); padding-left:1.4rem; line-height:2;">
-      <li><strong style="color:var(--text)">SFML clock in game code</strong> — <code>sf::Clock</code> leaks the SFML dependency into game logic. A <code>GameEngine::setTargetFPS()</code> would fix this.</li>
-      <li><strong style="color:var(--text)">Raw keycodes</strong> — input uses integer literals (<code>73 = up</code>) instead of a named enum. Works, but fragile.</li>
-      <li><strong style="color:var(--text)">GravityVisitor direction</strong> — subtracts from <code>dy</code>, which is upward in SFML's coordinate space. Correct behavior, counter-intuitive name.</li>
+      <li><strong style="color:var(--text)">GravityVisitor direction</strong> — subtracts from <code>dy</code>, which is upward in screen space. Correct behavior, counter-intuitive name.</li>
       <li><strong style="color:var(--text)">LayeredScene bounds</strong> — no bounds check on layer index; an out-of-range layer silently discards the sprite.</li>
-      <li><strong style="color:var(--text)">Text rendering</strong> — not implemented. <code>AbstractRenderer</code> has no text API.</li>
-      <li><strong style="color:var(--text)">Click events</strong> — input wrapper returns the last-observed click position rather than a queue, so rapid clicks can be missed.</li>
+      <li><strong style="color:var(--text)">Text rendering</strong> — not implemented; scores and turns print to the console. <code>AbstractRenderer</code> draws sprites and primitives, not text.</li>
+      <li><strong style="color:var(--text)">SFML backend</strong> — predates the SDL2 work and needs an SFML 2→3 port before <code>-DBACKEND=SFML</code> compiles.</li>
     </ul>
   </div>
 </section>
@@ -1035,7 +1066,7 @@ force-&gt;applyForce(ball, 10, rand()); // kick off at a random angle</code></pr
     <p style="max-width:none">
       Built in CS400 Game Development &nbsp;·&nbsp;
       <a href="html/index.html">API Reference (Doxygen)</a> &nbsp;·&nbsp;
-      <a href="https://github.com/jdspille/Visitor-Game-Engine">GitHub</a>
+      <a href="https://github.com/spilloid/Twove">GitHub</a>
     </p>
   </div>
 </footer>

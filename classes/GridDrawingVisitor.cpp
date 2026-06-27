@@ -8,6 +8,19 @@ GridDrawingVisitor::GridDrawingVisitor(int maxX, int maxY, std::shared_ptr<Abstr
 }
 
 void GridDrawingVisitor::draw() {
+    this->renderer->clear();
+
+    //draw the board grid lines first so sprites land on top of them. A faint
+    //grey keeps the grid visible without competing with the pieces.
+    unsigned int pxW = this->renderer->getWidth();
+    unsigned int pxH = this->renderer->getHeight();
+    unsigned int blockW = pxW / this->maxX;
+    unsigned int blockH = pxH / this->maxY;
+    for (int c = 0; c <= this->maxX; ++c)
+        this->renderer->drawLine(c * blockW, 0, c * blockW, pxH, 200, 200, 200);
+    for (int r = 0; r <= this->maxY; ++r)
+        this->renderer->drawLine(0, r * blockH, pxW, r * blockH, 200, 200, 200);
+
     //convert x / y coordinates from grid to pixel  ; done every refresh.
     //the rescaled sprites are freshly built here, so 'owned' holds them alive
     //for the duration of the draw call while 'view' hands the renderer
@@ -33,6 +46,7 @@ void GridDrawingVisitor::draw() {
         view.push_back(owned.back().get());
     }
   this->renderer->draw(view);
+  this->renderer->present();
   this->renderList.clear();
 }
 

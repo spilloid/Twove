@@ -3,7 +3,7 @@
     Configure and build the native desktop executable (Windows .exe).
 .DESCRIPTION
     Wraps the CMake configure + build steps for the native target. Produces
-    build\VisitorGameEngine.exe — the stdin game-select menu.
+    build\twove.exe — the stdin game-select menu.
 
     Requires CMake and a C++17 toolchain. SDL2 + SDL2_image must be discoverable
     by CMake; on Windows the simplest path is vcpkg (see docs/PACKAGING.md).
@@ -35,4 +35,4 @@ Write-Host "Building..." -ForegroundColor Cyan
 cmake --build build --config Release -j 4
 
 Write-Host "`nDone. Run the game menu with:" -ForegroundColor Green
-Write-Host "  ./build/VisitorGameEngine        (or build/Release/VisitorGameEngine.exe on MSVC)"
+Write-Host "  ./build/twove        (or build/Release/twove.exe on MSVC)"
