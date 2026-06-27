@@ -8,13 +8,20 @@ SDLRenderer::SDLRenderer(sdl::WindowPtr window, sdl::RendererPtr sdlRenderer,
     this->tf = std::make_unique<SDLTextureFactory>(this->sdlRenderer.get());
 }
 
-void SDLRenderer::draw(const std::vector<Sprite*>& renderList) {
+void SDLRenderer::clear() {
     SDL_Renderer *r = this->sdlRenderer.get();
-    // 1. REFRESH SCREEN (white background, matching the SFML backend)
+    // white background, matching the SFML backend
     SDL_SetRenderDrawColor(r, 255, 255, 255, 255);
     SDL_RenderClear(r);
+}
 
-    // 2. blit each sprite, stretching its texture to the sprite's rect
+void SDLRenderer::present() {
+    SDL_RenderPresent(this->sdlRenderer.get());
+}
+
+void SDLRenderer::draw(const std::vector<Sprite*>& renderList) {
+    SDL_Renderer *r = this->sdlRenderer.get();
+    // blit each sprite, stretching its texture to the sprite's rect
     for (const auto &i : renderList) {
         SDL_Texture *texture = this->tf->getTexture(i->getTextureLocation());
         if (texture == nullptr)
@@ -26,9 +33,21 @@ void SDLRenderer::draw(const std::vector<Sprite*>& renderList) {
         dest.h = static_cast<int>(i->getHeight());
         SDL_RenderCopy(r, texture, nullptr, &dest);
     }
+}
 
-    // 3. present
-    SDL_RenderPresent(r);
+void SDLRenderer::drawLine(int x1, int y1, int x2, int y2,
+                           unsigned char r, unsigned char g, unsigned char b) {
+    SDL_Renderer *ren = this->sdlRenderer.get();
+    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    SDL_RenderDrawLine(ren, x1, y1, x2, y2);
+}
+
+void SDLRenderer::fillRect(int x, int y, int w, int h,
+                           unsigned char r, unsigned char g, unsigned char b) {
+    SDL_Renderer *ren = this->sdlRenderer.get();
+    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    SDL_Rect rect{x, y, w, h};
+    SDL_RenderFillRect(ren, &rect);
 }
 
 bool SDLRenderer::isOpen() {

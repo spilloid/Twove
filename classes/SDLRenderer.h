@@ -38,10 +38,20 @@ public:
     SDLRenderer(sdl::WindowPtr window, sdl::RendererPtr sdlRenderer,
                 unsigned int screenWidth, unsigned int screenHeight);
 
+    void clear() override;
+
+    void present() override;
+
     /**
-     * @brief Draw every sprite in the list to the window, then present.
+     * @brief Blit every sprite in the list to the window (no clear/present).
      */
     void draw(const std::vector<Sprite*>& renderList) override;
+
+    void drawLine(int x1, int y1, int x2, int y2,
+                  unsigned char r, unsigned char g, unsigned char b) override;
+
+    void fillRect(int x, int y, int w, int h,
+                  unsigned char r, unsigned char g, unsigned char b) override;
 
     /**
      * @brief Pump events and report whether the window is still open.

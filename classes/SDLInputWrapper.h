@@ -14,7 +14,9 @@
  */
 class SDLInputWrapper : public AbstractInputWrapper {
 private:
-    SDL_Window *window; // borrowed, owned by SDLRenderer
+    SDL_Window *window;            // borrowed, owned by SDLRenderer
+    Uint32 pressStartTicks = 0;    // when the current press began (ms)
+    bool wasDown = false;          // left button state on the previous poll
 
 public:
     explicit SDLInputWrapper(SDL_Window *window);

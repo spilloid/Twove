@@ -31,11 +31,21 @@ public:
     SFMLRenderer(unsigned int screenWidth, unsigned int screenHeight);
     //TODO: PUT IN ABSTRACT
 
+    void clear() override;
+
+    void present() override;
+
     /**
      *
      * @param renderList draws all items in render list to screen
      */
     void draw(const std::vector<Sprite*>& renderList) override;
+
+    void drawLine(int x1, int y1, int x2, int y2,
+                  unsigned char r, unsigned char g, unsigned char b) override;
+
+    void fillRect(int x, int y, int w, int h,
+                  unsigned char r, unsigned char g, unsigned char b) override;
 
     /**
      *
