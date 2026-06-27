@@ -6,7 +6,7 @@
 Every entity is a `Sprite`. Every behavior is a `Visitor`. The engine loop is two
 virtual calls per sprite per frame — and that double dispatch *is* the engine.
 
-[**▶ Play the demos**](https://spilloid.github.io/Visitor-Game-Engine/) · [Packaging guide](docs/PACKAGING.md) · [API docs](https://spilloid.github.io/Visitor-Game-Engine/html/index.html)
+[**▶ Play the demos**](https://spillerstech.us/Twove/) · [Packaging guide](docs/PACKAGING.md) · [API docs](https://spillerstech.us/Twove/html/index.html)
 
 `Visitor` · `Abstract Factory` · `Strategy` · SDL2 · WebAssembly · zero `dynamic_cast`
 
@@ -39,7 +39,7 @@ The same engine and game code runs as a **native desktop app** *or* in the
 | 🖥️ Desktop | `twove(.exe)` — stdin game menu | SDL2 (default) / SFML | CMake |
 | 🌐 Web | one playable `.html` per game | SDL2 → WASM | Emscripten + CMake |
 
-▶ **[Try the WebAssembly demos in your browser →](https://spilloid.github.io/Visitor-Game-Engine/)**
+▶ **[Try the WebAssembly demos in your browser →](https://spillerstech.us/Twove/)**
 
 ## Quick start (desktop)
 
@@ -177,5 +177,5 @@ See [CLAUDE.md](CLAUDE.md) for the full house style.
 ---
 
 <div align="center">
-Built for CS400 Game Development · <a href="docs/PACKAGING.md">Packaging</a> · <a href="https://spilloid.github.io/Visitor-Game-Engine/">Live demos</a>
+Built for CS400 Game Development · <a href="docs/PACKAGING.md">Packaging</a> · <a href="https://spillerstech.us/Twove/">Live demos</a>
 </div>
