@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+#
+# Compile-check the native SDL2 desktop build on Linux. The games are GUI apps,
+# so this verifies the build rather than running it — handy for CI or for
+# checking a refactor compiles when you don't have a local C++ toolchain.
+#
+#   docker build -f Dockerfile.native -t vge-native .
+#   docker run --rm vge-native            # prints the built binary
+#
+# Swap SDL2 for SFML with:  --build-arg BACKEND=SFML  (needs libsfml-dev)
+ARG BACKEND=SDL2
+
+FROM ubuntu:24.04 AS build
+ARG BACKEND
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake \
+        libsdl2-dev libsdl2-image-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY . .
+RUN cmake -B build -DBACKEND="${BACKEND}" \
+ && cmake --build build -j"$(nproc)"
+
+CMD ["bash", "-lc", "echo 'Native build OK:'; ls -la build/VisitorGameEngine"]

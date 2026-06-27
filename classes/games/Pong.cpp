@@ -41,7 +41,7 @@ void Pong::start()
     ge->addSprite(ball);
 
     //tweak visitors
-    bbcv->setWatched(ball);
+    bbcv->setWatched(ball.get());
     fv->applyForce(ball, 10, rand());
 
     //add visitors to scene
@@ -86,19 +86,19 @@ void Pong::start()
                     }
                 }
             //handle collisions
-            std::list<std::shared_ptr<Sprite>> l = bbcv->getCollisions();
+            std::list<Sprite*> l = bbcv->getCollisions();
             for (auto &c : l) {
                 bool reset = false;
-                if (c == player1Goal) {
+                if (c == player1Goal.get()) {
                     p2points++;
                     //player 2 scores
                     reset = true;
-                } else if (c == player2Goal) {
+                } else if (c == player2Goal.get()) {
                     p1points++;
                     //player 1 scores
                     reset = true;
                     //by golly, we hit a paddle
-                } else if (c == player1) {
+                } else if (c == player1.get()) {
                     //bounce off paddle
                     //push ball off to stop multiple collisions
                     ball->setXY(ball->getX() + paddleWidth, ball->getY());
@@ -107,7 +107,7 @@ void Pong::start()
                             PADDLESPRING * ((ball->getY() - player1->getY()) / paddleHeight - 0.5f)
                     );
                     std::cout << ball->getDX() << " " << ball->getDY() << std::endl;
-                } else if (c == player2) {
+                } else if (c == player2.get()) {
                     ball->setXY(ball->getX() - paddleWidth, ball->getY());
                     ball->setDXY(
                             -fabs(ball->getDX()),

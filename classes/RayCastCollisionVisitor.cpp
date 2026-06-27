@@ -1,4 +1,4 @@
 #include "RayCastCollisionVisitor.h"
-void RayCastCollisionVisitor::visit(std::shared_ptr<Sprite> s) {
+void RayCastCollisionVisitor::visit(Sprite* s) {
 //TODO: implement
 }

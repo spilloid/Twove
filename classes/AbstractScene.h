@@ -23,6 +23,6 @@ public:
      *
      * @param v
      */
-    virtual void accept(std::shared_ptr<Visitor> v) = 0;
+    virtual void accept(Visitor* v) = 0;
 };
 #endif

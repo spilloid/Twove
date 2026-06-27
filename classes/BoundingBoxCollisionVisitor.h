@@ -10,6 +10,6 @@ class BoundingBoxCollisionVisitor : public AbstractCollisionVisitor{
      * 
      * @param s 
      */
-    void visit(std::shared_ptr<Sprite> s) override;
+    void visit(Sprite* s) override;
 };
 #endif

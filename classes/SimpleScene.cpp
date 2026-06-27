@@ -4,9 +4,9 @@ SimpleScene::SimpleScene() = default;
 
 SimpleScene::~SimpleScene() = default;
 
-void SimpleScene::accept(std::shared_ptr<Visitor> v) {
+void SimpleScene::accept(Visitor* v) {
     for (auto &i : this->spriteList) {
-        v->visit(i);
+        v->visit(i.get());
     }
 }
 

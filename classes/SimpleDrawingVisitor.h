@@ -10,7 +10,7 @@ private:
    * @brief cache for what to draw to screen
    * 
    */
-  std::vector<std::shared_ptr<Sprite>> renderList;
+  std::vector<Sprite*> renderList;
     /**
      * @brief Status of window
      *
@@ -29,7 +29,7 @@ public:
      *
      * @param s sprite to visit
      */
-    void visit(std::shared_ptr<Sprite> s) override;
+    void visit(Sprite* s) override;
 
     /**
      * @brief check if window is open

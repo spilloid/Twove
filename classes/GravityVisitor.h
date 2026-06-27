@@ -16,6 +16,6 @@ class GravityVisitor : public Visitor{
      * @brief add arbitrary dy up to move sprite simulating gravity
      * 
      */
-    void visit(std::shared_ptr<Sprite>) override;
+    void visit(Sprite*) override;
 };
 #endif

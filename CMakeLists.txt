@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(VisitorGameEngine VERSION 0.2 LANGUAGES CXX)
+project(VisitorGameEngine VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -75,7 +75,7 @@ if(EMSCRIPTEN)
     foreach(game ${GAMES})
         string(TOLOWER ${game} game_lower)
         string(TOUPPER ${game} game_upper)
-        add_executable(${game_lower} web_main.cpp ${ENGINE_SOURCES} ${SDL_BACKEND_SOURCES})
+        add_executable(${game_lower} main_web.cpp ${ENGINE_SOURCES} ${SDL_BACKEND_SOURCES})
         target_compile_definitions(${game_lower} PRIVATE GAME_${game_upper})
         target_compile_options(${game_lower} PRIVATE ${EMS_OPTIONS})
         target_link_options(${game_lower} PRIVATE ${EMS_LINK_OPTIONS})
@@ -88,7 +88,7 @@ else()
     # -----------------------------------------------------------------------
     # Native: single executable with the stdin game menu.
     # -----------------------------------------------------------------------
-    add_executable(VisitorGameEngine hello.cpp ${ENGINE_SOURCES})
+    add_executable(VisitorGameEngine main_native.cpp ${ENGINE_SOURCES})
 
     if(BACKEND STREQUAL "SDL2")
         target_sources(VisitorGameEngine PRIVATE ${SDL_BACKEND_SOURCES})

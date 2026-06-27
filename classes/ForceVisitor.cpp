@@ -1,5 +1,5 @@
 #include "ForceVisitor.h"
-void ForceVisitor::visit(std::shared_ptr<Sprite> s) {
+void ForceVisitor::visit(Sprite* s) {
     //for every object with a force on it
     s->setXY(
             s->getX() + s->getDX(),

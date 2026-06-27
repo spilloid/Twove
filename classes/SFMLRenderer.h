@@ -35,7 +35,7 @@ public:
      *
      * @param renderList draws all items in render list to screen
      */
-    void draw(std::vector<std::shared_ptr<Sprite>> renderList) override;
+    void draw(const std::vector<Sprite*>& renderList) override;
 
     /**
      *

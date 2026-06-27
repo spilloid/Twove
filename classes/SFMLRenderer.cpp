@@ -9,7 +9,7 @@ SFMLRenderer::SFMLRenderer(unsigned int screenWidth, unsigned int screenHeight)
     this->tf = std::make_shared<TextureFactory>();
 }
 
-void SFMLRenderer::draw(std::vector<std::shared_ptr<Sprite>> renderList) {
+void SFMLRenderer::draw(const std::vector<Sprite*>& renderList) {
     // 1. REFRESH SCREEN
     this->window->clear(sf::Color::White);
     //iterate over sprite list

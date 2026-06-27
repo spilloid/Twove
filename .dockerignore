@@ -1,0 +1,10 @@
+# Keep the build context small — only source, assets, CMake, entry points and
+# the web shell are needed to build either target.
+.git
+.vscode
+build
+build-web
+docs
+*.md
+DoxygenCOnfig
+Documentation.html

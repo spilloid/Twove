@@ -41,7 +41,7 @@ public:
     /**
      * @brief Draw every sprite in the list to the window, then present.
      */
-    void draw(std::vector<std::shared_ptr<Sprite>> renderList) override;
+    void draw(const std::vector<Sprite*>& renderList) override;
 
     /**
      * @brief Pump events and report whether the window is still open.
