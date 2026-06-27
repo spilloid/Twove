@@ -1,6 +1,6 @@
 <div align="center">
 
-# Visitor Game Engine
+# twove
 
 **A C++17 game engine where behavior is composed, not inherited.**
 Every entity is a `Sprite`. Every behavior is a `Visitor`. The engine loop is two
@@ -36,7 +36,7 @@ The same engine and game code runs as a **native desktop app** *or* in the
 
 | Target | Output | Backend | Build |
 |---|---|---|---|
-| 🖥️ Desktop | `VisitorGameEngine(.exe)` — stdin game menu | SDL2 (default) / SFML | CMake |
+| 🖥️ Desktop | `twove(.exe)` — stdin game menu | SDL2 (default) / SFML | CMake |
 | 🌐 Web | one playable `.html` per game | SDL2 → WASM | Emscripten + CMake |
 
 ▶ **[Try the WebAssembly demos in your browser →](https://spilloid.github.io/Visitor-Game-Engine/)**
@@ -55,7 +55,7 @@ Requires CMake, a C++17 compiler, and SDL2 + SDL2_image
 
 # …or CMake directly
 cmake -B build -DBACKEND=SDL2 && cmake --build build -j4
-./build/VisitorGameEngine        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor · 3 quit
+./build/twove        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor · 3 quit
 ```
 
 For the browser build, GitHub Pages packaging, and how to distribute the `.exe`,

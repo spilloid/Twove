@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visitor Game Engine</title>
+  <title>twove</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -521,7 +521,7 @@
 
 <!-- ── Nav ─────────────────────────────────────────────── -->
 <nav>
-  <span class="nav-brand">visitor<span>::</span>engine</span>
+  <span class="nav-brand">twove<span>()</span></span>
   <a href="#play">Play</a>
   <a href="#idea">The Idea</a>
   <a href="#dispatch">Dispatch</a>
@@ -610,7 +610,7 @@
     </div>
 
     <div class="demo-stage">
-      <iframe id="demo-frame" src="demos/pong.html" title="Visitor Game Engine — playable WASM demo"
+      <iframe id="demo-frame" src="demos/pong.html" title="twove — playable WASM demo"
               loading="lazy" allow="autoplay"></iframe>
     </div>
 
@@ -1034,7 +1034,7 @@ force-&gt;applyForce(ball, 10, rand()); // kick off at a random angle</code></pr
       </div>
       <pre class="language-bash"><code class="language-bash"># Desktop (SDL2 + CMake)
 cmake -B build -DBACKEND=SDL2 &amp;&amp; cmake --build build -j4
-./build/VisitorGameEngine        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor
+./build/twove        # menu: 0 TicTacToe · 1 Pong · 2 Quoridor
 
 # Windows: point CMake at your vcpkg toolchain
 ./scripts/build-native.ps1 -Toolchain C:\vcpkg\scripts\buildsystems\vcpkg.cmake
