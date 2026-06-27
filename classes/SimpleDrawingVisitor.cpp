@@ -1,5 +1,7 @@
 #include "SimpleDrawingVisitor.h"
 
+#include "VectorDrawing.h"
+
 #include <utility>
 
 SimpleDrawingVisitor::SimpleDrawingVisitor(std::shared_ptr<AbstractRenderer> ar) {
@@ -15,7 +17,13 @@ bool SimpleDrawingVisitor::isOpen() { return this->renderer->isOpen(); }
 
 void SimpleDrawingVisitor::draw() {
   this->renderer->clear();
-  this->renderer->draw(this->renderList);
+  std::vector<Sprite*> single(1);
+  for (auto *sprite : this->renderList) {
+    if (VectorDrawing::drawSprite(*this->renderer, sprite))
+      continue;
+    single[0] = sprite;
+    this->renderer->draw(single);
+  }
   this->renderer->present();
   this->renderList.clear();
 }

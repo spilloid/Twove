@@ -1,5 +1,7 @@
 #include "SDLRenderer.h"
 
+#include <cmath>
+
 SDLRenderer::SDLRenderer(sdl::WindowPtr window, sdl::RendererPtr sdlRenderer,
                          unsigned int screenWidth, unsigned int screenHeight)
         : window(std::move(window)), sdlRenderer(std::move(sdlRenderer)), open(true) {
@@ -40,6 +42,33 @@ void SDLRenderer::drawLine(int x1, int y1, int x2, int y2,
     SDL_Renderer *ren = this->sdlRenderer.get();
     SDL_SetRenderDrawColor(ren, r, g, b, 255);
     SDL_RenderDrawLine(ren, x1, y1, x2, y2);
+}
+
+void SDLRenderer::drawCircle(int cx, int cy, int radius,
+                             unsigned char r, unsigned char g, unsigned char b) {
+    if (radius <= 0)
+        return;
+    constexpr double PI = 3.14159265358979323846;
+    SDL_Renderer *ren = this->sdlRenderer.get();
+    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    for (int deg = 0; deg < 360; ++deg) {
+        double rad = deg * PI / 180.0;
+        int x = static_cast<int>(std::round(cx + std::cos(rad) * radius));
+        int y = static_cast<int>(std::round(cy + std::sin(rad) * radius));
+        SDL_RenderDrawPoint(ren, x, y);
+    }
+}
+
+void SDLRenderer::fillCircle(int cx, int cy, int radius,
+                             unsigned char r, unsigned char g, unsigned char b) {
+    if (radius <= 0)
+        return;
+    SDL_Renderer *ren = this->sdlRenderer.get();
+    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    for (int y = -radius; y <= radius; ++y) {
+        int span = static_cast<int>(std::sqrt(radius * radius - y * y));
+        SDL_RenderDrawLine(ren, cx - span, cy + y, cx + span, cy + y);
+    }
 }
 
 void SDLRenderer::fillRect(int x, int y, int w, int h,

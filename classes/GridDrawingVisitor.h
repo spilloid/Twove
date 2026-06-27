@@ -15,6 +15,10 @@ private:
      */
     int maxY;
     std::vector<Sprite*> renderList;
+    bool statusRailVisible = false;
+    unsigned char statusR = 0;
+    unsigned char statusG = 0;
+    unsigned char statusB = 0;
 public:
 /**
  * @brief Construct a new Grid Drawing Visitor object
@@ -24,6 +28,17 @@ public:
  * @param ar : abstract renderer
  */
     GridDrawingVisitor(int maxX, int maxY, std::shared_ptr<AbstractRenderer> ar);
+
+    /**
+     * @brief Show a slim coloured rail at the top of the grid, useful for
+     *        lightweight state such as the active Quoridor player.
+     */
+    void setStatusRail(unsigned char r, unsigned char g, unsigned char b);
+
+    /**
+     * @brief Hide the optional status rail.
+     */
+    void clearStatusRail();
 
     /**
      * @brief Draw cache to screen

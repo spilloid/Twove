@@ -50,6 +50,12 @@ public:
     void drawLine(int x1, int y1, int x2, int y2,
                   unsigned char r, unsigned char g, unsigned char b) override;
 
+    void drawCircle(int cx, int cy, int radius,
+                    unsigned char r, unsigned char g, unsigned char b) override;
+
+    void fillCircle(int cx, int cy, int radius,
+                    unsigned char r, unsigned char g, unsigned char b) override;
+
     void fillRect(int x, int y, int w, int h,
                   unsigned char r, unsigned char g, unsigned char b) override;
 

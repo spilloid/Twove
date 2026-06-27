@@ -1,5 +1,7 @@
 #include "Quoridor.h"
 
+#include "../VectorDrawing.h"
+
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
@@ -25,9 +27,11 @@ void Quoridor::start() {
     const int block = SCREEN / CELLS;
     const int START_WALLS = 10;
 
-    const std::string wallTex = "./assets/img/bbox.png";    // black wall
-    const std::string p1Tex = "./assets/img/blueX.png";     // player 1 pawn
-    const std::string p2Tex = "./assets/img/redSquare.png"; // player 2 pawn
+    const std::string wallTex = VectorSprites::Wall;
+    const std::string p1Tex = VectorSprites::PawnBlue;
+    const std::string p2Tex = VectorSprites::PawnRed;
+    const std::string p1TurnTex = VectorSprites::TurnBlue;
+    const std::string p2TurnTex = VectorSprites::TurnRed;
 
     //open a window via the build-time backend (SDL2, SFML, ...)
     std::shared_ptr<Backend> backend = createDefaultBackend();
@@ -43,8 +47,11 @@ void Quoridor::start() {
     int p1c = CELLS / 2, p1r = 0;          // top, races to the bottom row
     int p2c = CELLS / 2, p2r = CELLS - 1;  // bottom, races to the top row
     const double inset = 0.1, pawnSize = 0.8;
+    const double markerInset = 0.03, markerSize = 0.94;
+    auto turnMarker = std::make_shared<Sprite>(p1TurnTex, p1c + markerInset, p1r + markerInset, markerSize, markerSize);
     auto p1 = std::make_shared<Sprite>(p1Tex, p1c + inset, p1r + inset, pawnSize, pawnSize);
     auto p2 = std::make_shared<Sprite>(p2Tex, p2c + inset, p2r + inset, pawnSize, pawnSize);
+    ge->addSprite(turnMarker);
     ge->addSprite(p1);
     ge->addSprite(p2);
     ge->addVisitor(draw); // drawing visitor goes last
@@ -92,8 +99,21 @@ void Quoridor::start() {
 
     bool playing = true;
     int turn = 1;
+    auto updateTurnVisuals = [&]() {
+        int activeC = (turn == 1) ? p1c : p2c;
+        int activeR = (turn == 1) ? p1r : p2r;
+        turnMarker->setXY(activeC + markerInset, activeR + markerInset);
+        if (turn == 1) {
+            turnMarker->setTextureLocation(p1TurnTex);
+            draw->setStatusRail(34, 92, 255);
+        } else {
+            turnMarker->setTextureLocation(p2TurnTex);
+            draw->setStatusRail(210, 52, 52);
+        }
+    };
     auto switchTurn = [&]() { turn = (turn == 1) ? 2 : 1; };
     auto announceTurn = [&]() {
+        updateTurnVisuals();
         std::cout << "Player " << turn << "'s turn (walls left: " << wallsLeft[turn] << ")" << std::endl;
     };
 
@@ -117,6 +137,7 @@ void Quoridor::start() {
         cc = nc;
         auto &pawn = (turn == 1) ? p1 : p2;
         pawn->setXY(cc + inset, cr + inset);
+        updateTurnVisuals();
         if (turn == 1 && p1r == CELLS - 1) { std::cout << "Player 1 reaches the far side -- Player 1 wins!" << std::endl; playing = false; return; }
         if (turn == 2 && p2r == 0)         { std::cout << "Player 2 reaches the far side -- Player 2 wins!" << std::endl; playing = false; return; }
         switchTurn();

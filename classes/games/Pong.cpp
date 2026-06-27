@@ -1,22 +1,37 @@
 #include "Pong.h"
 
+#include "../VectorDrawing.h"
+
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+
 void Pong::start()
 {
     //constants
     const int MAXX = 500, MINX = 0, MAXY = 500, MINY = 0,
-            paddleHeight = 50, paddleWidth = 10, PADDLESPRING = 20;
-    const std::string black = "./assets/img/bbox.png";
+            paddleHeight = 50, paddleWidth = 10, ballSize = 10, PADDLESPRING = 20;
+    const double paddleStartY = MAXY / 2.0 - paddleHeight / 2.0;
+    const std::string courtTex = VectorSprites::PongCourt;
+    const std::string paddleTex = VectorSprites::PongPaddle;
+    const std::string ballTex = VectorSprites::PongBall;
+    const std::string netTex = VectorSprites::PongNet;
+    const std::string p1GoalTex = VectorSprites::PongGoalLeft;
+    const std::string p2GoalTex = VectorSprites::PongGoalRight;
     //declare sprites : texture, (x,y), (width,height)
+    std::shared_ptr<Sprite> court = std::make_shared<Sprite>(
+            courtTex, 0, 0, MAXX, MAXY);
     std::shared_ptr<Sprite> player1 = std::make_shared<Sprite>(
-            black, MINX + 100, MAXY / 2, paddleWidth, paddleHeight);
+            paddleTex, MINX + 100, paddleStartY, paddleWidth, paddleHeight);
     std::shared_ptr<Sprite> player2 = std::make_shared<Sprite>(
-            black, MAXX - 100, MAXY / 2, paddleWidth, paddleHeight);
+            paddleTex, MAXX - 100, paddleStartY, paddleWidth, paddleHeight);
     std::shared_ptr<Sprite> player1Goal = std::make_shared<Sprite>(
-            black, MINX + 10, 0, 5, MAXY * 2);
+            p1GoalTex, MINX + 10, 0, 5, MAXY * 2);
     std::shared_ptr<Sprite> player2Goal = std::make_shared<Sprite>(
-            black, MAXX - 10, 0, 5, MAXY * 2);
+            p2GoalTex, MAXX - 10, 0, 5, MAXY * 2);
     std::shared_ptr<Sprite> ball = std::make_shared<Sprite>(
-            black, MAXX / 2, MAXY / 2, 10, 10);
+            ballTex, MAXX / 2.0 - ballSize / 2.0, MAXY / 2.0 - ballSize / 2.0, ballSize, ballSize);
     //open a window via the build-time backend (SDL2, SFML, ...)
     std::shared_ptr<Backend> backend = createDefaultBackend();
     Platform platform = backend->create(MAXX, MAXY, "Pong");
@@ -36,16 +51,33 @@ void Pong::start()
     std::shared_ptr<AbstractInputWrapper> in = platform.input;
 
     //add sprites to scene
+    ge->addSprite(court);
     ge->addSprite(player1);
     ge->addSprite(player2);
     ge->addSprite(player1Goal);
     ge->addSprite(player2Goal);
+    for (int y = 18; y < MAXY; y += 42)
+        ge->addSprite(std::make_shared<Sprite>(netTex, MAXX / 2.0 - 1, y, 2, 20));
     ge->addSprite(ball);
 
     //tweak visitors
     bbcv->setWatched(ball.get());
     rcv->setWatched(ball.get());
-    fv->applyForce(ball, 10, rand());
+
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    auto serveBall = [&](int xDirection) {
+        int direction = xDirection < 0 ? -1 : 1;
+        int yJitter = (std::rand() % 7) - 3;
+        if (yJitter == 0)
+            yJitter = (std::rand() % 2 == 0) ? -2 : 2;
+        ball->setXY(MAXX / 2.0 - ballSize / 2.0, MAXY / 2.0 - ballSize / 2.0);
+        ball->setDXY(direction * 8.0, yJitter);
+    };
+    auto clampPaddles = [&]() {
+        player1->setXY(player1->getX(), std::clamp(player1->getY(), (double) MINY, (double) (MAXY - paddleHeight)));
+        player2->setXY(player2->getX(), std::clamp(player2->getY(), (double) MINY, (double) (MAXY - paddleHeight)));
+    };
+    serveBall(-1);
 
     //add visitors to scene
     ge->addVisitor(bbcv);
@@ -59,7 +91,6 @@ void Pong::start()
     Clock tick;
 
     //start the game
-    srand(time(nullptr));
     int p1points = 0, p2points = 0;
     while (draw->isOpen())
     {
@@ -67,6 +98,7 @@ void Pong::start()
         if (tick.getElapsedMilliseconds() > 50) {
             //update engine
             ge->update();
+            clampPaddles();
             //handle clock
             tick.restart();
 
@@ -107,25 +139,23 @@ void Pong::start()
                     //push ball off to stop multiple collisions
                     ball->setXY(ball->getX() + paddleWidth, ball->getY());
                     ball->setDXY(
-                            fabs(ball->getDX()),
+                            std::fabs(ball->getDX()),
                             PADDLESPRING * ((ball->getY() - player1->getY()) / paddleHeight - 0.5f)
                     );
                     std::cout << ball->getDX() << " " << ball->getDY() << std::endl;
                 } else if (c == player2.get()) {
                     ball->setXY(ball->getX() - paddleWidth, ball->getY());
                     ball->setDXY(
-                            -fabs(ball->getDX()),
+                            -std::fabs(ball->getDX()),
                             PADDLESPRING * ((ball->getY() - player2->getY()) / paddleHeight - 0.5f)
                     );
                     std::cout << ball->getDX() << " " << ball->getDY() << std::endl;
                 }
                 //game over? next round!
                 if (reset) {
-                    ball->setXY(MAXX / 2, MAXY / 2);
-                    ball->setDXY(0, 0);
-                    player1->setXY(player1->getX(), MAXY / 2);
-                    player2->setXY(player2->getX(), MAXY / 2);
-                    fv->applyForce(ball, 10, rand()%45+90 );
+                    player1->setXY(player1->getX(), paddleStartY);
+                    player2->setXY(player2->getX(), paddleStartY);
+                    serveBall(c == player1Goal.get() ? -1 : 1);
                     std::cout << "POINT! Score : Player 1: " << p1points << " | Player 2: " << p2points << std::endl;
                     //silly wait to pause game shortly (yielding so the browser stays alive)
                     while (tick.getElapsedSeconds() < 2) frameYield(16);
@@ -141,6 +171,7 @@ void Pong::start()
                 if (hit == player2Goal.get()) incoming = true;
             double aiTarget = incoming ? ball->getY() - paddleHeight / 2.0 - 20
                                        : MAXY / 2.0 - paddleHeight / 2.0;
+            aiTarget = std::clamp(aiTarget, (double) MINY, (double) (MAXY - paddleHeight));
             player2->setXY(player2->getX(), aiTarget);
 
             draw->draw();

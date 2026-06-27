@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(twove VERSION 1.1 LANGUAGES CXX)
+project(twove VERSION 1.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,6 +29,7 @@ set(ENGINE_SOURCES
         classes/SimpleScene.cpp
         classes/LayeredScene.cpp
         classes/AbstractRenderer.cpp
+        classes/VectorDrawing.cpp
         classes/AbstractCollisionVisitor.cpp
         classes/SimpleDrawingVisitor.cpp
         classes/GridDrawingVisitor.cpp
