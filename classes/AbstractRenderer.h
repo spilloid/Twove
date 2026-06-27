@@ -17,6 +17,6 @@ public:
 
     virtual bool isOpen() = 0;
 
-    virtual void draw(std::vector<std::shared_ptr<Sprite>> renderList) = 0;
+    virtual void draw(const std::vector<Sprite*>& renderList) = 0;
 };
 #endif // !1RENDERER_H

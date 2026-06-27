@@ -35,6 +35,6 @@ public:
      *
      * @param v
      */
-    void accept(std::shared_ptr<Visitor> v) override;
+    void accept(Visitor* v) override;
 };
 #endif

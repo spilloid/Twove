@@ -3,7 +3,7 @@ BoundingBoxCollisionVisitor::BoundingBoxCollisionVisitor() {
   this->watched = nullptr;
 }
 
-void BoundingBoxCollisionVisitor::visit(std::shared_ptr<Sprite> s) {
+void BoundingBoxCollisionVisitor::visit(Sprite* s) {
     // if watched isnt set or if the watched is visiting himself we ignore it
     if (this->watched == nullptr || s == this->watched)return;
     // watched attributes

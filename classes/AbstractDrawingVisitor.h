@@ -28,6 +28,6 @@ class AbstractDrawingVisitor : public Visitor{
      * 
      * @param s 
      */
-    void visit(std::shared_ptr<Sprite> s) override = 0;
+    void visit(Sprite* s) override = 0;
 };
 #endif // ABSTRACTDRAWINGVISITOR_H

@@ -3,7 +3,7 @@
 BounceBoundsVisitor::BounceBoundsVisitor(int minX, int maxX, int minY, int maxY)
         : minX(minX), maxX(maxX), minY(minY), maxY(maxY) {}
 
-void BounceBoundsVisitor::visit(std::shared_ptr<Sprite> sp) {
+void BounceBoundsVisitor::visit(Sprite* sp) {
     double ox = sp->getX();
     double oy = sp->getY();
     double nx = ox;

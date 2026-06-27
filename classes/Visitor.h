@@ -6,10 +6,14 @@
 class Visitor{
     public:
     /**
-     * @brief visit sprite
-     * 
-     * @param sp 
+     * @brief visit a sprite
+     *
+     * The sprite is a non-owning observer pointer: the scene owns the sprite,
+     * the visitor only looks at / mutates it. Passing a raw pointer keeps
+     * double dispatch lightweight — no shared_ptr refcount traffic per call.
+     *
+     * @param sp non-owning pointer to the sprite being visited
      */
-    virtual void visit(std::shared_ptr<Sprite> sp) = 0;
+    virtual void visit(Sprite* sp) = 0;
 };
 #endif

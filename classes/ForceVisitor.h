@@ -13,7 +13,7 @@ public:
      * 
      * @param s 
      */
-    void visit(std::shared_ptr<Sprite> s) override;
+    void visit(Sprite* s) override;
 
     /**
      * @brief apply a force to the sprite

@@ -23,6 +23,6 @@ class BounceBoundsVisitor : public Visitor{
      * 
      * @param sp 
      */
-    void visit(std::shared_ptr<Sprite> sp) override;
+    void visit(Sprite* sp) override;
 };
 #endif

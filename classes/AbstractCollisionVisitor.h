@@ -12,33 +12,33 @@ class AbstractCollisionVisitor : public Visitor{
      * @brief list of sprites colliding with watched since last check
      * 
      */
-    std::list<std::shared_ptr<Sprite>> collisions;
+    std::list<Sprite*> collisions;
     /**
-     * @brief sprite to watch and compare for collisions
+     * @brief sprite to watch and compare for collisions (non-owning)
      *
      */
-    std::shared_ptr<Sprite> watched;
+    Sprite* watched = nullptr;
     public:
     /**
      * @brief update currently colliding list based on algorithm
-     * 
-     * @param s 
+     *
+     * @param s
      */
-    void visit(std::shared_ptr<Sprite> s) override = 0;
+    void visit(Sprite* s) override = 0;
 
     /**
-     * @brief 
-     * 
+     * @brief
+     *
      * @return std::list<Sprite*> list of all sprites that collided with watched since last check
      */
-    std::list<std::shared_ptr<Sprite>> getCollisions();
+    std::list<Sprite*> getCollisions();
 
     /**
      * @brief Set the Watched object
-     * 
-     * @param s 
+     *
+     * @param s
      */
-    void setWatched(std::shared_ptr<Sprite> s);
+    void setWatched(Sprite* s);
 
 };
 #endif

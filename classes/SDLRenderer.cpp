@@ -8,7 +8,7 @@ SDLRenderer::SDLRenderer(sdl::WindowPtr window, sdl::RendererPtr sdlRenderer,
     this->tf = std::make_unique<SDLTextureFactory>(this->sdlRenderer.get());
 }
 
-void SDLRenderer::draw(std::vector<std::shared_ptr<Sprite>> renderList) {
+void SDLRenderer::draw(const std::vector<Sprite*>& renderList) {
     SDL_Renderer *r = this->sdlRenderer.get();
     // 1. REFRESH SCREEN (white background, matching the SFML backend)
     SDL_SetRenderDrawColor(r, 255, 255, 255, 255);

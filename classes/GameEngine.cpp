@@ -24,5 +24,5 @@ void GameEngine::setScene(std::shared_ptr<AbstractScene> as) {
 void GameEngine::update() {
   // operating on scene
   for (auto &sceneVisitor : this->sceneVisitors)
-    this->scene->accept(sceneVisitor); // end if ; check interval
+    this->scene->accept(sceneVisitor.get()); // end if ; check interval
 } // eof

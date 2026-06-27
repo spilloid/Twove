@@ -5,7 +5,7 @@
 #include "AbstractCollisionVisitor.h"
 
 class RayCastCollisionVisitor : public AbstractCollisionVisitor {
-    void visit(std::shared_ptr<Sprite> s) override;
+    void visit(Sprite* s) override;
 };
 
 #endif

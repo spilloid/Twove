@@ -14,7 +14,7 @@ private:
      * 
      */
     int maxY;
-    std::vector<std::shared_ptr<Sprite>> renderList;
+    std::vector<Sprite*> renderList;
 public:
 /**
  * @brief Construct a new Grid Drawing Visitor object
@@ -44,6 +44,6 @@ public:
      * 
      * @param s 
      */
-    void visit(std::shared_ptr<Sprite> s) override;
+    void visit(Sprite* s) override;
 };
 #endif

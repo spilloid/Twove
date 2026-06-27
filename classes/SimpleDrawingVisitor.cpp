@@ -7,7 +7,7 @@ SimpleDrawingVisitor::SimpleDrawingVisitor(std::shared_ptr<AbstractRenderer> ar)
     this->renderer = std::move(ar);
 }
 
-void SimpleDrawingVisitor::visit(std::shared_ptr<Sprite> s) {
+void SimpleDrawingVisitor::visit(Sprite* s) {
     this->renderList.push_back(s);
 }
 
