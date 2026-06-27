@@ -1,6 +1,7 @@
 <div align="center">
 
 # twove
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/4e9615fd-5113-4bfe-a42e-8923c7eb35b5" />
 
 **A C++17 game engine where behavior is composed, not inherited.**
 Every entity is a `Sprite`. Every behavior is a `Visitor`. The engine loop is two
@@ -177,5 +178,5 @@ See [CLAUDE.md](CLAUDE.md) for the full house style.
 ---
 
 <div align="center">
-Built for CS400 Game Development · <a href="docs/PACKAGING.md">Packaging</a> · <a href="https://spillerstech.us/Twove/">Live demos</a>
+<a href="docs/PACKAGING.md">Packaging</a> · <a href="https://spillerstech.us/Twove/">Live demos</a>
 </div>
