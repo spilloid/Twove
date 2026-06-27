@@ -13,6 +13,7 @@ inline constexpr const char *PawnRed = "vector://pawn/red";
 inline constexpr const char *TurnBlue = "vector://turn/blue";
 inline constexpr const char *TurnRed = "vector://turn/red";
 inline constexpr const char *Wall = "vector://wall";
+inline constexpr const char *WallGhost = "vector://wall/ghost";
 inline constexpr const char *PongCourt = "vector://pong/court";
 inline constexpr const char *PongPaddle = "vector://pong/paddle";
 inline constexpr const char *PongBall = "vector://pong/ball";

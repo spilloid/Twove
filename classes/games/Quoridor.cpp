@@ -1,11 +1,13 @@
 #include "Quoridor.h"
 
+#include "../GameHud.h"
 #include "../VectorDrawing.h"
 
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <queue>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -32,15 +34,18 @@ void Quoridor::start() {
     const std::string p2Tex = VectorSprites::PawnRed;
     const std::string p1TurnTex = VectorSprites::TurnBlue;
     const std::string p2TurnTex = VectorSprites::TurnRed;
+    const std::string ghostWallTex = VectorSprites::WallGhost;
+    const std::string blankTex = VectorSprites::Blank;
 
     //open a window via the build-time backend (SDL2, SFML, ...)
     std::shared_ptr<Backend> backend = createDefaultBackend();
-    Platform platform = backend->create(SCREEN, SCREEN, "Quoridor");
+    Platform platform = backend->create(SCREEN, SCREEN + GameHud::BarHeight, "Quoridor");
     std::shared_ptr<AbstractRenderer> sr = platform.renderer;
     std::shared_ptr<AbstractInputWrapper> in = platform.input;
 
     std::shared_ptr<GameEngine> ge = std::make_shared<GameEngine>();
     std::shared_ptr<GridDrawingVisitor> draw = std::make_shared<GridDrawingVisitor>(CELLS, CELLS, sr);
+    draw->setViewport(0, GameHud::BarHeight, SCREEN, SCREEN);
 
     // pawn LOGICAL positions (col,row); the sprites are just the visual mirror,
     // inset slightly inside their cell so the grid lines stay readable.
@@ -51,9 +56,13 @@ void Quoridor::start() {
     auto turnMarker = std::make_shared<Sprite>(p1TurnTex, p1c + markerInset, p1r + markerInset, markerSize, markerSize);
     auto p1 = std::make_shared<Sprite>(p1Tex, p1c + inset, p1r + inset, pawnSize, pawnSize);
     auto p2 = std::make_shared<Sprite>(p2Tex, p2c + inset, p2r + inset, pawnSize, pawnSize);
+    auto hoverH = std::make_shared<Sprite>(blankTex, 0, 0, 2, 0.15);
+    auto hoverV = std::make_shared<Sprite>(blankTex, 0, 0, 0.15, 2);
     ge->addSprite(turnMarker);
     ge->addSprite(p1);
     ge->addSprite(p2);
+    ge->addSprite(hoverH);
+    ge->addSprite(hoverV);
     ge->addVisitor(draw); // drawing visitor goes last
 
     // Wall state. hWall[r][c] = horizontal wall on the line below row r spanning
@@ -97,8 +106,93 @@ void Quoridor::start() {
         return false;
     };
 
-    bool playing = true;
+    int wins[3] = {0, 0, 0};
+    bool roundOver = false;
+    int winnerPlayer = 0;
     int turn = 1;
+
+    auto canPreviewWall = [&](int r, int c, bool horizontal) -> bool {
+        if (r < 0 || r >= SLOTS || c < 0 || c >= SLOTS || wallsLeft[turn] <= 0)
+            return false;
+
+        if (horizontal) {
+            if (hWall[r][c]) return false;
+            if (c - 1 >= 0 && hWall[r][c - 1]) return false;
+            if (c + 1 < SLOTS && hWall[r][c + 1]) return false;
+            if (vWall[r][c]) return false;
+            hWall[r][c] = true;
+            bool ok = reachable(p1r, p1c, CELLS - 1) && reachable(p2r, p2c, 0);
+            hWall[r][c] = false;
+            return ok;
+        }
+
+        if (vWall[r][c]) return false;
+        if (r - 1 >= 0 && vWall[r - 1][c]) return false;
+        if (r + 1 < SLOTS && vWall[r + 1][c]) return false;
+        if (hWall[r][c]) return false;
+        vWall[r][c] = true;
+        bool ok = reachable(p1r, p1c, CELLS - 1) && reachable(p2r, p2c, 0);
+        vWall[r][c] = false;
+        return ok;
+    };
+
+    struct WallPreview {
+        int r = 0;
+        int c = 0;
+        bool horizontal = false;
+        bool valid = false;
+    };
+
+    auto wallPreviewFromPointer = [&](int px, int py) {
+        WallPreview preview;
+        if (px < 0 || px >= SCREEN || py < GameHud::BarHeight || py >= GameHud::BarHeight + SCREEN)
+            return preview;
+
+        double fx = px / (double) block;
+        double fy = (py - GameHud::BarHeight) / (double) block;
+        int cellC = (int) fx, cellR = (int) fy;
+        double inX = fx - cellC, inY = fy - cellR;
+        double distV = std::min(inX, 1.0 - inX);
+        double distH = std::min(inY, 1.0 - inY);
+        bool nearLine = std::min(distH, distV) < 0.25;
+        if (!nearLine)
+            return preview;
+
+        preview.horizontal = distH < distV;
+        if (preview.horizontal) {
+            int line = (int) (fy + 0.5);
+            preview.r = line - 1;
+            preview.c = (int) fx;
+        } else {
+            int line = (int) (fx + 0.5);
+            preview.r = (int) fy;
+            preview.c = line - 1;
+        }
+        preview.valid = canPreviewWall(preview.r, preview.c, preview.horizontal);
+        return preview;
+    };
+
+    auto hideWallPreview = [&]() {
+        hoverH->setTextureLocation(blankTex);
+        hoverV->setTextureLocation(blankTex);
+    };
+
+    auto updateWallPreview = [&](int px, int py, bool down) {
+        hideWallPreview();
+        if (roundOver || down)
+            return;
+        WallPreview preview = wallPreviewFromPointer(px, py);
+        if (!preview.valid)
+            return;
+        if (preview.horizontal) {
+            hoverH->setXY(preview.c, (preview.r + 1) - 0.075);
+            hoverH->setTextureLocation(ghostWallTex);
+        } else {
+            hoverV->setXY((preview.c + 1) - 0.075, preview.r);
+            hoverV->setTextureLocation(ghostWallTex);
+        }
+    };
+
     auto updateTurnVisuals = [&]() {
         int activeC = (turn == 1) ? p1c : p2c;
         int activeR = (turn == 1) ? p1r : p2r;
@@ -111,11 +205,55 @@ void Quoridor::start() {
             draw->setStatusRail(210, 52, 52);
         }
     };
+    auto resetRound = [&]() {
+        for (int r = 0; r < CELLS; ++r) {
+            for (int c = 0; c < CELLS; ++c) {
+                hWall[r][c] = false;
+                vWall[r][c] = false;
+            }
+        }
+        for (auto &wall : wallSprites)
+            wall->setTextureLocation(VectorSprites::Blank);
+        wallSprites.clear();
+        p1c = CELLS / 2;
+        p1r = 0;
+        p2c = CELLS / 2;
+        p2r = CELLS - 1;
+        p1->setXY(p1c + inset, p1r + inset);
+        p2->setXY(p2c + inset, p2r + inset);
+        wallsLeft[1] = START_WALLS;
+        wallsLeft[2] = START_WALLS;
+        turn = 1;
+        winnerPlayer = 0;
+        roundOver = false;
+        hideWallPreview();
+        updateTurnVisuals();
+    };
     auto switchTurn = [&]() { turn = (turn == 1) ? 2 : 1; };
     auto announceTurn = [&]() {
         updateTurnVisuals();
         std::cout << "Player " << turn << "'s turn (walls left: " << wallsLeft[turn] << ")" << std::endl;
     };
+    auto statusText = [&]() {
+        if (roundOver && winnerPlayer != 0)
+            return std::string("P") + std::to_string(winnerPlayer) + " YOU WIN!";
+        return std::string("P") + std::to_string(turn) + " TURN W" + std::to_string(wallsLeft[turn]);
+    };
+    auto scoreText = [&]() {
+        return std::string("WINS ") + std::to_string(wins[1]) + "-" + std::to_string(wins[2]);
+    };
+    draw->setOverlay([&](AbstractRenderer &renderer) {
+        GameHud::drawTopBar(renderer, renderer.getWidth(), "QUORIDOR", statusText(), scoreText());
+        if (roundOver) {
+            GameHud::drawResultBanner(
+                    renderer,
+                    renderer.getWidth(),
+                    GameHud::BarHeight + SCREEN / 2,
+                    statusText(),
+                    winnerPlayer == 2 ? GameHud::Color{230, 70, 78} : GameHud::Color{39, 98, 255}
+            );
+        }
+    });
 
     // Attempt a pawn move (with a straight jump over the opponent) for the
     // active player; advances the turn and checks for a win on success.
@@ -138,8 +276,20 @@ void Quoridor::start() {
         auto &pawn = (turn == 1) ? p1 : p2;
         pawn->setXY(cc + inset, cr + inset);
         updateTurnVisuals();
-        if (turn == 1 && p1r == CELLS - 1) { std::cout << "Player 1 reaches the far side -- Player 1 wins!" << std::endl; playing = false; return; }
-        if (turn == 2 && p2r == 0)         { std::cout << "Player 2 reaches the far side -- Player 2 wins!" << std::endl; playing = false; return; }
+        if (turn == 1 && p1r == CELLS - 1) {
+            std::cout << "Player 1 reaches the far side -- Player 1 wins!" << std::endl;
+            wins[1]++;
+            winnerPlayer = 1;
+            roundOver = true;
+            return;
+        }
+        if (turn == 2 && p2r == 0) {
+            std::cout << "Player 2 reaches the far side -- Player 2 wins!" << std::endl;
+            wins[2]++;
+            winnerPlayer = 2;
+            roundOver = true;
+            return;
+        }
         switchTurn();
         announceTurn();
     };
@@ -185,6 +335,9 @@ void Quoridor::start() {
 
     // Translate a click/tap into either a wall placement or a pawn move.
     auto handleClick = [&](int px, int py, bool longPress) {
+        if (px < 0 || px >= SCREEN || py < GameHud::BarHeight || py >= GameHud::BarHeight + SCREEN)
+            return;
+        py -= GameHud::BarHeight;
         double fx = px / (double) block; // board coordinates, in cells
         double fy = py / (double) block;
         int cellC = (int) fx, cellR = (int) fy;
@@ -220,7 +373,7 @@ void Quoridor::start() {
     bool prevDir[4] = {false, false, false, false}; // Up, Down, Left, Right edges
     bool wasDown = false, longHandled = false, sawLong = false;
 
-    while (draw->isOpen() && playing) {
+    while (draw->isOpen()) {
         frameYield(16); // browser: yield to the event loop; native: no-op
         if (tick.getElapsedMilliseconds() > 30) {
             tick.restart();
@@ -228,29 +381,40 @@ void Quoridor::start() {
             // keyboard movement, edge-detected so a held key steps exactly once
             std::vector<Key> keys = in->getKeyPresses();
             bool dir[4] = {false, false, false, false};
-            for (Key &k : keys) {
-                if (k == Key::Up) dir[0] = true;
-                else if (k == Key::Down) dir[1] = true;
-                else if (k == Key::Left) dir[2] = true;
-                else if (k == Key::Right) dir[3] = true;
+            if (!roundOver) {
+                for (Key &k : keys) {
+                    if (k == Key::Up) dir[0] = true;
+                    else if (k == Key::Down) dir[1] = true;
+                    else if (k == Key::Left) dir[2] = true;
+                    else if (k == Key::Right) dir[3] = true;
+                }
             }
-            if (playing && dir[0] && !prevDir[0]) tryMove(-1, 0);
-            if (playing && dir[1] && !prevDir[1]) tryMove(1, 0);
-            if (playing && dir[2] && !prevDir[2]) tryMove(0, -1);
-            if (playing && dir[3] && !prevDir[3]) tryMove(0, 1);
+            if (!roundOver && dir[0] && !prevDir[0]) tryMove(-1, 0);
+            if (!roundOver && dir[1] && !prevDir[1]) tryMove(1, 0);
+            if (!roundOver && dir[2] && !prevDir[2]) tryMove(0, -1);
+            if (!roundOver && dir[3] && !prevDir[3]) tryMove(0, 1);
             for (int i = 0; i < 4; ++i) prevDir[i] = dir[i];
 
             // mouse / touch: long-press places a wall immediately; a short tap is
             // resolved on release (wall near a line, otherwise a move).
             click c = in->getLastClick();
             bool down = c.isLeft != 0;
-            if (down && !wasDown) { longHandled = false; sawLong = false; }
-            if (playing && down && c.isLong && !longHandled) {
+            updateWallPreview(c.x, c.y, down);
+            if (down && !wasDown) {
+                longHandled = false;
+                sawLong = false;
+                if (GameHud::isReplayClick(c.x, c.y, SCREEN)) {
+                    resetRound();
+                    longHandled = true;
+                    sawLong = true;
+                }
+            }
+            if (!roundOver && down && c.isLong && !longHandled) {
                 handleClick(c.x, c.y, true);
                 longHandled = true;
                 sawLong = true;
             }
-            if (playing && !down && wasDown && !sawLong) {
+            if (!roundOver && !down && wasDown && !sawLong) {
                 handleClick(c.x, c.y, false);
             }
             wasDown = down;

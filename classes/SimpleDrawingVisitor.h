@@ -2,6 +2,7 @@
 #define SFMLDRAWINGVISITOR_H
 #include "AbstractDrawingVisitor.h"
 #include "AbstractRenderer.h"
+#include <functional>
 #include <vector>
 #include <map>
 class SimpleDrawingVisitor : public AbstractDrawingVisitor {
@@ -16,6 +17,7 @@ private:
      *
      */
     bool open;
+    std::function<void(AbstractRenderer&)> overlay;
 public:
 /**
  * @brief Construct a new SimpleDrawingVisitor object
@@ -30,6 +32,16 @@ public:
      * @param s sprite to visit
      */
     void visit(Sprite* s) override;
+
+    /**
+     * @brief Draw a primitive overlay after sprites but before present().
+     */
+    void setOverlay(std::function<void(AbstractRenderer&)> overlay);
+
+    /**
+     * @brief Remove the current primitive overlay.
+     */
+    void clearOverlay();
 
     /**
      * @brief check if window is open
