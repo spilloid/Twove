@@ -66,6 +66,15 @@ void SFMLRenderer::fillRect(int x, int y, int w, int h,
     rect.setFillColor(sf::Color(r, g, b));
     this->window->draw(rect);
 }
+
+void SFMLRenderer::fillRectAlpha(int x, int y, int w, int h,
+                                 unsigned char r, unsigned char g, unsigned char b,
+                                 unsigned char a) {
+    sf::RectangleShape rect(sf::Vector2f(w, h));
+    rect.setPosition(x, y);
+    rect.setFillColor(sf::Color(r, g, b, a));
+    this->window->draw(rect);
+}
 bool SFMLRenderer::isOpen()
 {
     if (this->window->isOpen())

@@ -18,6 +18,9 @@ RUN emcmake cmake -B build-web -DCMAKE_BUILD_TYPE=Release \
 
 # ── Stage 2: dead-simple static server for the .wasm bundles ─────────────────
 FROM nginx:1.27-alpine
+LABEL org.opencontainers.image.source="https://github.com/spilloid/Twove" \
+      org.opencontainers.image.title="twove" \
+      org.opencontainers.image.description="Playable WebAssembly demos for the twove visitor-driven game engine"
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/index.html /usr/share/nginx/html/index.html
 # Each game is a self-contained set: <game>.{html,js,wasm,data}

@@ -60,5 +60,12 @@ public:
      */
     virtual void fillRect(int x, int y, int w, int h,
                           unsigned char r, unsigned char g, unsigned char b) = 0;
+
+    /**
+     * @brief Draw a translucent filled rectangle in pixel space.
+     */
+    virtual void fillRectAlpha(int x, int y, int w, int h,
+                               unsigned char r, unsigned char g, unsigned char b,
+                               unsigned char a) = 0;
 };
 #endif // !1RENDERER_H

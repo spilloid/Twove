@@ -79,6 +79,19 @@ void SDLRenderer::fillRect(int x, int y, int w, int h,
     SDL_RenderFillRect(ren, &rect);
 }
 
+void SDLRenderer::fillRectAlpha(int x, int y, int w, int h,
+                                unsigned char r, unsigned char g, unsigned char b,
+                                unsigned char a) {
+    SDL_Renderer *ren = this->sdlRenderer.get();
+    SDL_BlendMode previous = SDL_BLENDMODE_NONE;
+    SDL_GetRenderDrawBlendMode(ren, &previous);
+    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(ren, r, g, b, a);
+    SDL_Rect rect{x, y, w, h};
+    SDL_RenderFillRect(ren, &rect);
+    SDL_SetRenderDrawBlendMode(ren, previous);
+}
+
 bool SDLRenderer::isOpen() {
     // Drain the whole event queue each frame so we never miss a quit and so
     // SDL_GetKeyboardState (used by the input wrapper) stays current.

@@ -98,6 +98,12 @@ void drawWall(AbstractRenderer &r, int x, int y, int w, int h) {
     drawBorder(r, x, y, w, h, 10, 14, 20);
 }
 
+void drawGhostWall(AbstractRenderer &r, int x, int y, int w, int h) {
+    r.fillRectAlpha(x, y, w, h, 39, 98, 255, 128);
+    drawBorder(r, x, y, w, h, 165, 205, 255);
+    r.fillRectAlpha(x + 2, y + 2, std::max(1, w - 4), std::max(1, h - 4), 255, 255, 255, 64);
+}
+
 void drawPongCourt(AbstractRenderer &r, int x, int y, int w, int h) {
     r.fillRect(x, y, w, h, 14, 18, 26);
     r.fillRect(x + 8, y + 8, std::max(1, w - 16), std::max(1, h - 16), 20, 25, 36);
@@ -170,6 +176,10 @@ bool VectorDrawing::drawSprite(AbstractRenderer &renderer, Sprite *sprite) {
     }
     if (id == VectorSprites::Wall) {
         drawWall(renderer, x, y, w, h);
+        return true;
+    }
+    if (id == VectorSprites::WallGhost) {
+        drawGhostWall(renderer, x, y, w, h);
         return true;
     }
     if (id == VectorSprites::PongCourt) {

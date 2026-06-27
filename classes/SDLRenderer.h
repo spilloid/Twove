@@ -59,6 +59,10 @@ public:
     void fillRect(int x, int y, int w, int h,
                   unsigned char r, unsigned char g, unsigned char b) override;
 
+    void fillRectAlpha(int x, int y, int w, int h,
+                       unsigned char r, unsigned char g, unsigned char b,
+                       unsigned char a) override;
+
     /**
      * @brief Pump events and report whether the window is still open.
      */

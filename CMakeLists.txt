@@ -30,6 +30,7 @@ set(ENGINE_SOURCES
         classes/LayeredScene.cpp
         classes/AbstractRenderer.cpp
         classes/VectorDrawing.cpp
+        classes/GameHud.cpp
         classes/AbstractCollisionVisitor.cpp
         classes/SimpleDrawingVisitor.cpp
         classes/GridDrawingVisitor.cpp

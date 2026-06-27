@@ -1,18 +1,21 @@
 #include "Pong.h"
 
+#include "../GameHud.h"
 #include "../VectorDrawing.h"
 
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <string>
 
 void Pong::start()
 {
     //constants
-    const int MAXX = 500, MINX = 0, MAXY = 500, MINY = 0,
-            paddleHeight = 50, paddleWidth = 10, ballSize = 10, PADDLESPRING = 20;
-    const double paddleStartY = MAXY / 2.0 - paddleHeight / 2.0;
+    const int MAXX = 500, MINX = 0, PLAY_HEIGHT = 500, MINY = GameHud::BarHeight,
+            MAXY = MINY + PLAY_HEIGHT, paddleHeight = 50, paddleWidth = 10,
+            ballSize = 10, PADDLESPRING = 20, WIN_SCORE = 5;
+    const double paddleStartY = MINY + PLAY_HEIGHT / 2.0 - paddleHeight / 2.0;
     const std::string courtTex = VectorSprites::PongCourt;
     const std::string paddleTex = VectorSprites::PongPaddle;
     const std::string ballTex = VectorSprites::PongBall;
@@ -21,17 +24,17 @@ void Pong::start()
     const std::string p2GoalTex = VectorSprites::PongGoalRight;
     //declare sprites : texture, (x,y), (width,height)
     std::shared_ptr<Sprite> court = std::make_shared<Sprite>(
-            courtTex, 0, 0, MAXX, MAXY);
+            courtTex, 0, MINY, MAXX, PLAY_HEIGHT);
     std::shared_ptr<Sprite> player1 = std::make_shared<Sprite>(
             paddleTex, MINX + 100, paddleStartY, paddleWidth, paddleHeight);
     std::shared_ptr<Sprite> player2 = std::make_shared<Sprite>(
             paddleTex, MAXX - 100, paddleStartY, paddleWidth, paddleHeight);
     std::shared_ptr<Sprite> player1Goal = std::make_shared<Sprite>(
-            p1GoalTex, MINX + 10, 0, 5, MAXY * 2);
+            p1GoalTex, MINX + 10, MINY, 5, PLAY_HEIGHT);
     std::shared_ptr<Sprite> player2Goal = std::make_shared<Sprite>(
-            p2GoalTex, MAXX - 10, 0, 5, MAXY * 2);
+            p2GoalTex, MAXX - 10, MINY, 5, PLAY_HEIGHT);
     std::shared_ptr<Sprite> ball = std::make_shared<Sprite>(
-            ballTex, MAXX / 2.0 - ballSize / 2.0, MAXY / 2.0 - ballSize / 2.0, ballSize, ballSize);
+            ballTex, MAXX / 2.0 - ballSize / 2.0, MINY + PLAY_HEIGHT / 2.0 - ballSize / 2.0, ballSize, ballSize);
     //open a window via the build-time backend (SDL2, SFML, ...)
     std::shared_ptr<Backend> backend = createDefaultBackend();
     Platform platform = backend->create(MAXX, MAXY, "Pong");
@@ -56,7 +59,7 @@ void Pong::start()
     ge->addSprite(player2);
     ge->addSprite(player1Goal);
     ge->addSprite(player2Goal);
-    for (int y = 18; y < MAXY; y += 42)
+    for (int y = MINY + 18; y < MAXY; y += 42)
         ge->addSprite(std::make_shared<Sprite>(netTex, MAXX / 2.0 - 1, y, 2, 20));
     ge->addSprite(ball);
 
@@ -70,7 +73,7 @@ void Pong::start()
         int yJitter = (std::rand() % 7) - 3;
         if (yJitter == 0)
             yJitter = (std::rand() % 2 == 0) ? -2 : 2;
-        ball->setXY(MAXX / 2.0 - ballSize / 2.0, MAXY / 2.0 - ballSize / 2.0);
+        ball->setXY(MAXX / 2.0 - ballSize / 2.0, MINY + PLAY_HEIGHT / 2.0 - ballSize / 2.0);
         ball->setDXY(direction * 8.0, yJitter);
     };
     auto clampPaddles = [&]() {
@@ -78,6 +81,46 @@ void Pong::start()
         player2->setXY(player2->getX(), std::clamp(player2->getY(), (double) MINY, (double) (MAXY - paddleHeight)));
     };
     serveBall(-1);
+
+    int p1points = 0, p2points = 0;
+    int wins[3] = {0, 0, 0};
+    bool matchOver = false;
+    int winnerPlayer = 0;
+    auto resetPaddles = [&]() {
+        player1->setXY(player1->getX(), paddleStartY);
+        player2->setXY(player2->getX(), paddleStartY);
+        fv->stop(player1);
+        fv->stop(player2);
+    };
+    auto resetMatch = [&]() {
+        p1points = 0;
+        p2points = 0;
+        matchOver = false;
+        winnerPlayer = 0;
+        resetPaddles();
+        serveBall(-1);
+    };
+    auto statusText = [&]() {
+        if (matchOver && winnerPlayer != 0)
+            return std::string("P") + std::to_string(winnerPlayer) + " YOU WIN!";
+        return std::string("PLAY TO ") + std::to_string(WIN_SCORE);
+    };
+    auto scoreText = [&]() {
+        return std::string("PTS ") + std::to_string(p1points) + "-" + std::to_string(p2points) +
+               " W " + std::to_string(wins[1]) + "-" + std::to_string(wins[2]);
+    };
+    draw->setOverlay([&](AbstractRenderer &renderer) {
+        GameHud::drawTopBar(renderer, renderer.getWidth(), "PONG", statusText(), scoreText());
+        if (matchOver) {
+            GameHud::drawResultBanner(
+                    renderer,
+                    renderer.getWidth(),
+                    MINY + PLAY_HEIGHT / 2,
+                    statusText(),
+                    winnerPlayer == 2 ? GameHud::Color{230, 70, 78} : GameHud::Color{39, 98, 255}
+            );
+        }
+    });
 
     //add visitors to scene
     ge->addVisitor(bbcv);
@@ -91,22 +134,33 @@ void Pong::start()
     Clock tick;
 
     //start the game
-    int p1points = 0, p2points = 0;
+    bool wasPressed = false;
     while (draw->isOpen())
     {
         frameYield(16); // browser: yield to the event loop; native: no-op
         if (tick.getElapsedMilliseconds() > 50) {
-            //update engine
+            tick.restart();
+
+            click replayClick = in->getLastClick();
+            bool pressed = replayClick.isLeft != 0;
+            if (pressed && !wasPressed && GameHud::isReplayClick(replayClick.x, replayClick.y, MAXX))
+                resetMatch();
+            wasPressed = pressed;
+
+            if (matchOver) {
+                ball->setDXY(0, 0);
+                fv->stop(player1);
+                fv->stop(player2);
+            }
+
             ge->update();
             clampPaddles();
-            //handle clock
-            tick.restart();
 
             //handle keypress (Up/W move the paddle up, Down/S move it down)
             std::vector<Key> keys = in->getKeyPresses();
-            if (keys.empty())
+            if (matchOver || keys.empty())
                 fv->stop(player1);
-            else
+            else {
                 for (Key &key : keys) {
                     switch (key) {
                         case Key::Up:
@@ -121,9 +175,12 @@ void Pong::start()
                             break;
                     }
                 }
+            }
             //handle collisions
             std::list<Sprite*> l = bbcv->getCollisions();
             for (auto &c : l) {
+                if (matchOver)
+                    break;
                 bool reset = false;
                 if (c == player1Goal.get()) {
                     p2points++;
@@ -153,13 +210,18 @@ void Pong::start()
                 }
                 //game over? next round!
                 if (reset) {
-                    player1->setXY(player1->getX(), paddleStartY);
-                    player2->setXY(player2->getX(), paddleStartY);
-                    serveBall(c == player1Goal.get() ? -1 : 1);
                     std::cout << "POINT! Score : Player 1: " << p1points << " | Player 2: " << p2points << std::endl;
-                    //silly wait to pause game shortly (yielding so the browser stays alive)
-                    while (tick.getElapsedSeconds() < 2) frameYield(16);
-                    //start the next round
+                    if (p1points >= WIN_SCORE || p2points >= WIN_SCORE) {
+                        winnerPlayer = p1points >= WIN_SCORE ? 1 : 2;
+                        wins[winnerPlayer]++;
+                        matchOver = true;
+                        resetPaddles();
+                        ball->setXY(MAXX / 2.0 - ballSize / 2.0, MINY + PLAY_HEIGHT / 2.0 - ballSize / 2.0);
+                        ball->setDXY(0, 0);
+                    } else {
+                        resetPaddles();
+                        serveBall(c == player1Goal.get() ? -1 : 1);
+                    }
                 }
             }
             //raycast "AI": the ray from the ball hits player2Goal only when the
@@ -170,9 +232,17 @@ void Pong::start()
             for (auto *hit : rcv->getCollisions())
                 if (hit == player2Goal.get()) incoming = true;
             double aiTarget = incoming ? ball->getY() - paddleHeight / 2.0 - 20
-                                       : MAXY / 2.0 - paddleHeight / 2.0;
+                                       : MINY + PLAY_HEIGHT / 2.0 - paddleHeight / 2.0;
             aiTarget = std::clamp(aiTarget, (double) MINY, (double) (MAXY - paddleHeight));
-            player2->setXY(player2->getX(), aiTarget);
+            if (matchOver) {
+                fv->stop(player2);
+            } else {
+                double delta = aiTarget - player2->getY();
+                if (std::fabs(delta) < 2.0)
+                    fv->stop(player2);
+                else
+                    player2->setDXY(0, std::clamp(delta, -5.0, 5.0));
+            }
 
             draw->draw();
         }

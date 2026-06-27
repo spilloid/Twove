@@ -1,6 +1,7 @@
 #ifndef GRIDDRAWINGVISITOR_H
 #define GRIDDRAWINGVISITOR_H
 #include "AbstractDrawingVisitor.h"
+#include <functional>
 class GridDrawingVisitor : public AbstractDrawingVisitor
 {
 private:
@@ -19,6 +20,11 @@ private:
     unsigned char statusR = 0;
     unsigned char statusG = 0;
     unsigned char statusB = 0;
+    int viewportX = 0;
+    int viewportY = 0;
+    int viewportWidth = 0;
+    int viewportHeight = 0;
+    std::function<void(AbstractRenderer&)> overlay;
 public:
 /**
  * @brief Construct a new Grid Drawing Visitor object
@@ -39,6 +45,21 @@ public:
      * @brief Hide the optional status rail.
      */
     void clearStatusRail();
+
+    /**
+     * @brief Restrict the grid board to a pixel viewport inside the window.
+     */
+    void setViewport(int x, int y, int width, int height);
+
+    /**
+     * @brief Draw a primitive overlay after board sprites but before present().
+     */
+    void setOverlay(std::function<void(AbstractRenderer&)> overlay);
+
+    /**
+     * @brief Remove the current primitive overlay.
+     */
+    void clearOverlay();
 
     /**
      * @brief Draw cache to screen
